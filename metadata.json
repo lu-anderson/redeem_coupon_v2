@@ -1,0 +1,5 @@
+{
+  "name": "Cupons do Amor - Redeem",
+  "description": "Interface para resgate de cupons afetivos com integração Firebase.",
+  "requestFramePermissions": []
+}
