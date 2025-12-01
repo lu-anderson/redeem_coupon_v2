@@ -1,4 +1,21 @@
-export type CouponCategory = 'carinho' | 'diversao' | 'surpresa' | 'romance' | 'aventura' | 'noite-livre';
+export type CouponCategory = 'carinho' | 'diversao' | 'surpresa' | 'romance' | 'aventura' | 'noite-livre' | string;
+
+export interface CouponTemplate {
+  nome: string;
+  descricao: string;
+  raridade: string;
+  icone: string;
+  imagem_sugerida?: string;
+  premium: boolean;
+  enabled: boolean;
+}
+
+export interface CategoryData {
+  nome: string;
+  cor: string;
+  icone: string;
+  cupons: CouponTemplate[];
+}
 
 export interface Coupon {
   id: string;
@@ -11,6 +28,11 @@ export interface Coupon {
   createdAt: any;
   isActive: boolean;
   message?: string; // Optional description
+  // New fields
+  rarity?: string;
+  icon?: string;
+  color?: string;
+  observations?: string;
 }
 
 export interface Notification {

@@ -5,11 +5,12 @@ import { Coupon } from '../types';
 import CouponCard from '../components/CouponCard';
 import confetti from 'canvas-confetti';
 import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { couponCategories } from '../constants/coupons';
 
 const RedeemPage: React.FC = () => {
   console.log('Rendering RedeemPage');
   const { id } = useParams<{ id: string }>();
-  
+
   const [coupon, setCoupon] = useState<Coupon | null>(null);
   const [loading, setLoading] = useState(true);
   const [redeeming, setRedeeming] = useState(false);
@@ -19,9 +20,11 @@ const RedeemPage: React.FC = () => {
 
   useEffect(() => {
     const fetch = async () => {
+      console.log('Fetching coupon data for ID:', id);
       if (!id) return;
       try {
         const data = await getCoupon(id);
+        console.log(data)
         if (data) {
           setCoupon(data);
         } else {
@@ -77,19 +80,78 @@ const RedeemPage: React.FC = () => {
   }
 
   if (success) {
+    // Resolve display values for success screen
+    const templateData = couponCategories
+      .flatMap(c => c.cupons.map(t => ({ ...t, categoryColor: c.cor, categoryIcon: c.icone })))
+      .find(t => t.nome === coupon.name);
+
+    const getCategoryColor = (category: string) => {
+      switch (category) {
+        case 'carinho': return '#FFB3BA';
+        case 'romance': return '#FFFFBA';
+        case 'aventura': return '#FFDFBA';
+        case 'diversao': return '#BAFFC9';
+        case 'surpresa': return '#BAE1FF';
+        case 'noite-livre': return '#E2E8F0';
+        default: return '#F3F4F6';
+      }
+    };
+
+    const displayColor = coupon.color || templateData?.categoryColor || getCategoryColor(coupon.category);
+    const displayIcon = coupon.icon || templateData?.icone || templateData?.categoryIcon || '🎟️';
+    const displayRarity = coupon.rarity || templateData?.raridade;
+
     return (
-      <div className="min-h-screen bg-gradient-to-b from-love-light/30 to-white flex flex-col items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-3xl shadow-xl text-center max-w-md w-full animate-fade-in-up">
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle2 className="w-10 h-10 text-green-500" />
+      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex flex-col items-center justify-center p-4">
+        <div className="bg-white p-8 rounded-3xl shadow-xl text-center max-w-md w-full animate-fade-in-up border-t-8" style={{ borderColor: displayColor }}>
+
+          <div
+            className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg relative"
+            style={{ backgroundColor: displayColor }}
+          >
+            <span className="text-4xl">{typeof displayIcon === 'string' ? displayIcon : '❤️'}</span>
+            <div className="absolute -bottom-2 -right-2 bg-green-500 text-white p-2 rounded-full border-4 border-white">
+              <CheckCircle2 className="w-6 h-6" />
+            </div>
           </div>
+
           <h1 className="text-3xl font-extrabold text-gray-800 mb-2">Resgatado!</h1>
-          <p className="text-gray-600 mb-6">
+
+          {displayRarity && (
+            <div className="text-yellow-500 text-xl mb-4 font-bold tracking-widest">
+              {displayRarity}
+            </div>
+          )}
+
+          <p className="text-gray-600 mb-8">
             Oba! O cupom <strong>{coupon.name}</strong> foi validado com sucesso. Aproveite seu momento! ❤️
           </p>
-          <button 
-            onClick={() => window.close()} // Works if opened via script, otherwise acts as no-op usually
-            className="w-full py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+
+          {coupon.observations && (
+            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-100 rounded-xl text-left mb-6">
+              <p className="text-xs text-yellow-700 font-bold mb-1 uppercase">Observações:</p>
+              <p className="text-gray-600 text-sm">
+                {coupon.observations}
+              </p>
+            </div>
+          )}
+
+          <div className="bg-pink-50 rounded-2xl p-6 mb-6 border border-pink-100">
+            <p className="text-gray-700 font-medium mb-4 text-sm">
+              Gostou da surpresa? 😍<br />
+              Crie também momentos inesquecíveis para quem você ama!
+            </p>
+            <button
+              onClick={() => window.open('https://play.google.com/store/apps/details?id=com.cuponsdoamor', '_blank')}
+              className="block w-full py-3 bg-love text-white rounded-xl font-bold hover:bg-love-light hover:shadow-love/40 transition-all shadow-lg transform active:scale-95"
+            >
+              Baixar o App
+            </button>
+          </div>
+
+          <button
+            onClick={() => window.close()}
+            className="text-gray-400 text-sm font-medium hover:text-gray-600 transition-colors underline"
           >
             Fechar Janela
           </button>
@@ -101,7 +163,7 @@ const RedeemPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#FAFAFA] py-10 px-4 flex flex-col items-center">
       <div className="w-full max-w-md space-y-8">
-        
+
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-extrabold text-gray-800">Resgatar Cupom</h1>
           <p className="text-gray-500">Você recebeu um gesto de carinho!</p>
