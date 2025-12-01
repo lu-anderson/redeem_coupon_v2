@@ -5,7 +5,38 @@ import { Coupon, Notification } from '../types';
 const COUPONS_COLLECTION = 'coupons';
 const NOTIFICATIONS_COLLECTION = 'notifications';
 
+/**
+ * Validates a coupon ID format
+ * @param id - The ID to validate
+ * @returns true if valid, false otherwise
+ */
+const isValidCouponId = (id: string): boolean => {
+  if (!id || typeof id !== 'string') return false;
+  // Firestore document IDs: alphanumeric, hyphens, underscores, max 128 chars
+  const validPattern = /^[a-zA-Z0-9_-]{1,128}$/;
+  return validPattern.test(id.trim());
+};
+
+/**
+ * Sanitizes a user name for safe storage and display
+ * @param name - The name to sanitize
+ * @returns Sanitized name
+ */
+const sanitizeUserName = (name: string): string => {
+  if (!name || typeof name !== 'string') return '';
+  return name
+    .trim()
+    .slice(0, 50) // Limit length
+    .replace(/<[^>]*>/g, '') // Remove HTML tags
+    .replace(/[<>]/g, ''); // Remove angle brackets
+};
+
 export const getCoupon = async (id: string): Promise<Coupon | null> => {
+  // Validate ID format before querying
+  if (!isValidCouponId(id)) {
+    return null;
+  }
+
   try {
     const docRef = doc(db, COUPONS_COLLECTION, id);
     const docSnap = await getDoc(docRef);
@@ -23,9 +54,8 @@ export const getCoupon = async (id: string): Promise<Coupon | null> => {
     } else {
       return null;
     }
-  } catch (error) {
-    console.error("Error fetching coupon:", error);
-    throw error;
+  } catch {
+    throw new Error('Erro ao buscar cupom.');
   }
 };
 
@@ -38,9 +68,44 @@ export const getCoupon = async (id: string): Promise<Coupon | null> => {
  * 1. Allow updates only if 'quantity' > 0.
  * 2. Allow updates only to specific fields (like quantity).
  * 3. Prevent users from modifying 'originalQuantity' or 'name'.
+ * 
+ * RECOMMENDED FIRESTORE SECURITY RULES:
+ * ```
+ * rules_version = '2';
+ * service cloud.firestore {
+ *   match /databases/{database}/documents {
+ *     match /coupons/{couponId} {
+ *       allow read: if true;
+ *       allow update: if 
+ *         request.resource.data.quantity == resource.data.quantity - 1 &&
+ *         resource.data.quantity > 0 &&
+ *         resource.data.isActive == true &&
+ *         request.resource.data.name == resource.data.name &&
+ *         request.resource.data.originalQuantity == resource.data.originalQuantity &&
+ *         request.resource.data.userId == resource.data.userId;
+ *       allow create, delete: if false;
+ *     }
+ *     match /notifications/{notificationId} {
+ *       allow create: if 
+ *         request.resource.data.type == 'coupon_used' &&
+ *         request.resource.data.isRead == false;
+ *       allow read, update, delete: if false;
+ *     }
+ *   }
+ * }
+ * ```
  */
-// TODO: Improve security with Firestore Rules
 export const redeemCoupon = async (couponId: string, userName: string): Promise<boolean> => {
+  // Validate inputs
+  if (!isValidCouponId(couponId)) {
+    throw new Error("Cupom não encontrado.");
+  }
+  
+  const sanitizedUserName = sanitizeUserName(userName);
+  if (!sanitizedUserName || sanitizedUserName.length < 2) {
+    throw new Error("Nome inválido.");
+  }
+  
   try {
     await runTransaction(db, async (transaction) => {
       const couponRef = doc(db, COUPONS_COLLECTION, couponId);
@@ -82,10 +147,10 @@ export const redeemCoupon = async (couponId: string, userName: string): Promise<
         userId: couponData.userId, // The owner of the coupon receives the notification
         type: 'coupon_used',
         title: 'Cupom Resgatado! ❤️',
-        message: `${userName} acabou de resgatar o cupom "${couponData.name}"!`,
+        message: `${sanitizedUserName} acabou de resgatar o cupom "${couponData.name}"!`,
         couponId: couponId,
         couponName: couponData.name,
-        usedBy: userName,
+        usedBy: sanitizedUserName,
         createdAt: serverTimestamp(),
         isRead: false
       };
@@ -95,7 +160,19 @@ export const redeemCoupon = async (couponId: string, userName: string): Promise<
 
     return true;
   } catch (error) {
-    console.error("Transaction failed: ", error);
-    throw error;
+    // Re-throw known safe errors, wrap unknown errors
+    if (error instanceof Error) {
+      const safeMessages = [
+        'Cupom não encontrado.',
+        'Este cupom foi desativado.',
+        'Este cupom já foi totalmente utilizado!',
+        'Este cupom expirou.',
+        'Nome inválido.'
+      ];
+      if (safeMessages.includes(error.message)) {
+        throw error;
+      }
+    }
+    throw new Error('Erro ao processar resgate.');
   }
 };
