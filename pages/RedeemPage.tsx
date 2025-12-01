@@ -6,9 +6,9 @@ import CouponCard from '../components/CouponCard';
 import confetti from 'canvas-confetti';
 import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { couponCategories } from '../constants/coupons';
+import { sanitizeCouponId, validateUserName, escapeHtml, getSafeErrorMessage } from '../utils/sanitize';
 
 const RedeemPage: React.FC = () => {
-  console.log('Rendering RedeemPage');
   const { id } = useParams<{ id: string }>();
 
   const [coupon, setCoupon] = useState<Coupon | null>(null);
@@ -16,36 +16,74 @@ const RedeemPage: React.FC = () => {
   const [redeeming, setRedeeming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userName, setUserName] = useState('');
+  const [userNameError, setUserNameError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    const fetch = async () => {
-      console.log('Fetching coupon data for ID:', id);
-      if (!id) return;
-      try {
-        const data = await getCoupon(id);
-        console.log(data)
-        if (data) {
-          setCoupon(data);
-        } else {
-          setError('Cupom não encontrado ou inválido.');
+    // Flag to prevent state updates after unmount
+    let isMounted = true;
+    
+    const fetchCoupon = async () => {
+      // Validate and sanitize the coupon ID
+      const sanitizedId = sanitizeCouponId(id);
+      if (!sanitizedId) {
+        if (isMounted) {
+          setError('Link inválido.');
+          setLoading(false);
         }
-      } catch (err) {
-        setError('Erro ao carregar o cupom. Tente novamente.');
+        return;
+      }
+      
+      try {
+        const data = await getCoupon(sanitizedId);
+        if (isMounted) {
+          if (data) {
+            setCoupon(data);
+          } else {
+            setError('Cupom não encontrado ou inválido.');
+          }
+        }
+      } catch {
+        if (isMounted) {
+          setError('Erro ao carregar o cupom. Tente novamente.');
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
-    fetch();
+    
+    fetchCoupon();
+    
+    // Cleanup function to prevent memory leaks
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
   const handleRedeem = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!id || !userName.trim()) return;
-
+    
+    // Validate and sanitize coupon ID
+    const sanitizedId = sanitizeCouponId(id);
+    if (!sanitizedId) {
+      setError('Link inválido.');
+      return;
+    }
+    
+    // Validate and sanitize user name
+    const validation = validateUserName(userName);
+    if (!validation.isValid) {
+      setUserNameError(validation.error || 'Nome inválido');
+      return;
+    }
+    
+    setUserNameError(null);
     setRedeeming(true);
+    
     try {
-      await redeemCoupon(id, userName);
+      await redeemCoupon(sanitizedId, validation.sanitized);
       setSuccess(true);
       confetti({
         particleCount: 150,
@@ -53,8 +91,10 @@ const RedeemPage: React.FC = () => {
         origin: { y: 0.6 },
         colors: ['#FF6B9D', '#FFB3BA', '#ffffff']
       });
-    } catch (err: any) {
-      alert(err.message || 'Erro ao resgatar.');
+    } catch (err: unknown) {
+      // Use safe error message to prevent exposing internal details
+      const safeMessage = getSafeErrorMessage(err);
+      setError(safeMessage);
     } finally {
       setRedeeming(false);
     }
@@ -124,14 +164,14 @@ const RedeemPage: React.FC = () => {
           )}
 
           <p className="text-gray-600 mb-8">
-            Oba! O cupom <strong>{coupon.name}</strong> foi validado com sucesso. Aproveite seu momento! ❤️
+            Oba! O cupom <strong>{escapeHtml(coupon.name)}</strong> foi validado com sucesso. Aproveite seu momento! ❤️
           </p>
 
           {coupon.observations && (
             <div className="mt-4 p-3 bg-yellow-50 border border-yellow-100 rounded-xl text-left mb-6">
               <p className="text-xs text-yellow-700 font-bold mb-1 uppercase">Observações:</p>
               <p className="text-gray-600 text-sm">
-                {coupon.observations}
+                {escapeHtml(coupon.observations)}
               </p>
             </div>
           )}
@@ -182,11 +222,31 @@ const RedeemPage: React.FC = () => {
                 type="text"
                 required
                 value={userName}
-                onChange={(e) => setUserName(e.target.value)}
+                onChange={(e) => {
+                  setUserName(e.target.value);
+                  setUserNameError(null);
+                }}
+                maxLength={50}
+                minLength={2}
                 placeholder="Seu nome ou apelido carinhoso..."
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-love focus:ring-2 focus:ring-love/20 outline-none transition-all placeholder:text-gray-300"
+                className={`w-full px-4 py-3 rounded-xl border ${
+                  userNameError ? 'border-red-300 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-love focus:ring-love/20'
+                } focus:ring-2 outline-none transition-all placeholder:text-gray-300`}
+                aria-describedby={userNameError ? "name-error" : undefined}
+                aria-invalid={userNameError ? "true" : "false"}
               />
+              {userNameError && (
+                <p id="name-error" className="text-red-500 text-xs mt-1" role="alert">
+                  {userNameError}
+                </p>
+              )}
             </div>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-3" role="alert">
+                <p className="text-red-600 text-sm text-center">{error}</p>
+              </div>
+            )}
 
             <button
               type="submit"

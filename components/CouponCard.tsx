@@ -2,6 +2,7 @@ import React from 'react';
 import { Coupon, CouponCategory } from '../types';
 import { Heart, Star, Zap, Smile, Moon, Gift } from 'lucide-react';
 import { couponCategories } from '../constants/coupons';
+import { escapeHtml } from '../utils/sanitize';
 
 interface CouponCardProps {
   coupon: Coupon;
@@ -78,7 +79,7 @@ const CouponCard: React.FC<CouponCardProps> = ({ coupon }) => {
         {/* Content */}
         <div className="p-6 text-center space-y-4">
           <h2 className="text-2xl font-bold text-gray-800 leading-tight">
-            {coupon.name}
+            {escapeHtml(coupon.name)}
           </h2>
 
           <div className="w-full h-px bg-gray-100 my-4 dashed-line"></div>
@@ -96,7 +97,7 @@ const CouponCard: React.FC<CouponCardProps> = ({ coupon }) => {
 
           {coupon.message && (
             <p className="text-gray-500 italic text-sm mt-4">
-              "{coupon.message}"
+              "{escapeHtml(coupon.message)}"
             </p>
           )}
 
@@ -104,7 +105,7 @@ const CouponCard: React.FC<CouponCardProps> = ({ coupon }) => {
             <div className="mt-4 p-3 bg-yellow-50 border border-yellow-100 rounded-xl text-left">
               <p className="text-xs text-yellow-700 font-bold mb-1 uppercase">Observações:</p>
               <p className="text-gray-600 text-sm">
-                {displayObservations}
+                {escapeHtml(displayObservations)}
               </p>
             </div>
           )}
