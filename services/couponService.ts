@@ -1,44 +1,20 @@
 import { db } from './firebase';
 import { doc, getDoc, runTransaction, collection, serverTimestamp } from 'firebase/firestore';
 import { Coupon, Notification } from '../types';
+import { sanitizeCouponId, validateUserName } from '../utils/sanitize';
 
 const COUPONS_COLLECTION = 'coupons';
 const NOTIFICATIONS_COLLECTION = 'notifications';
 
-/**
- * Validates a coupon ID format
- * @param id - The ID to validate
- * @returns true if valid, false otherwise
- */
-const isValidCouponId = (id: string): boolean => {
-  if (!id || typeof id !== 'string') return false;
-  // Firestore document IDs: alphanumeric, hyphens, underscores, max 128 chars
-  const validPattern = /^[a-zA-Z0-9_-]{1,128}$/;
-  return validPattern.test(id.trim());
-};
-
-/**
- * Sanitizes a user name for safe storage and display
- * @param name - The name to sanitize
- * @returns Sanitized name
- */
-const sanitizeUserName = (name: string): string => {
-  if (!name || typeof name !== 'string') return '';
-  return name
-    .trim()
-    .slice(0, 50) // Limit length
-    .replace(/<[^>]*>/g, '') // Remove HTML tags
-    .replace(/[<>]/g, ''); // Remove angle brackets
-};
-
 export const getCoupon = async (id: string): Promise<Coupon | null> => {
   // Validate ID format before querying
-  if (!isValidCouponId(id)) {
+  const sanitizedId = sanitizeCouponId(id);
+  if (!sanitizedId) {
     return null;
   }
 
   try {
-    const docRef = doc(db, COUPONS_COLLECTION, id);
+    const docRef = doc(db, COUPONS_COLLECTION, sanitizedId);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
@@ -96,19 +72,20 @@ export const getCoupon = async (id: string): Promise<Coupon | null> => {
  * ```
  */
 export const redeemCoupon = async (couponId: string, userName: string): Promise<boolean> => {
-  // Validate inputs
-  if (!isValidCouponId(couponId)) {
+  // Validate inputs using shared utilities
+  const sanitizedId = sanitizeCouponId(couponId);
+  if (!sanitizedId) {
     throw new Error("Cupom não encontrado.");
   }
   
-  const sanitizedUserName = sanitizeUserName(userName);
-  if (!sanitizedUserName || sanitizedUserName.length < 2) {
+  const nameValidation = validateUserName(userName);
+  if (!nameValidation.isValid) {
     throw new Error("Nome inválido.");
   }
   
   try {
     await runTransaction(db, async (transaction) => {
-      const couponRef = doc(db, COUPONS_COLLECTION, couponId);
+      const couponRef = doc(db, COUPONS_COLLECTION, sanitizedId);
       const couponDoc = await transaction.get(couponRef);
 
       if (!couponDoc.exists()) {
@@ -147,10 +124,10 @@ export const redeemCoupon = async (couponId: string, userName: string): Promise<
         userId: couponData.userId, // The owner of the coupon receives the notification
         type: 'coupon_used',
         title: 'Cupom Resgatado! ❤️',
-        message: `${sanitizedUserName} acabou de resgatar o cupom "${couponData.name}"!`,
-        couponId: couponId,
+        message: `${nameValidation.sanitized} acabou de resgatar o cupom "${couponData.name}"!`,
+        couponId: sanitizedId,
         couponName: couponData.name,
-        usedBy: sanitizedUserName,
+        usedBy: nameValidation.sanitized,
         createdAt: serverTimestamp(),
         isRead: false
       };

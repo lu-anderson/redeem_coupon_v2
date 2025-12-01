@@ -64,18 +64,19 @@ export function validateUserName(name: string): { isValid: boolean; sanitized: s
     return { isValid: false, sanitized: trimmed, error: 'Nome deve ter no máximo 50 caracteres' };
   }
   
-  // Remove any HTML-like tags but keep accented characters
-  // This is more permissive for names but still prevents injection
-  const sanitized = trimmed
-    .replace(/<[^>]*>/g, '') // Remove HTML tags
-    .replace(/[<>]/g, '');   // Remove any remaining angle brackets
-  
-  // Check if sanitization removed significant content (possible attack)
-  if (sanitized.length !== trimmed.length) {
-    return { isValid: false, sanitized, error: 'Nome contém caracteres inválidos' };
+  // Reject input containing HTML-like content (angle brackets)
+  // This is more secure than trying to sanitize - we simply don't allow it
+  if (/<|>/.test(trimmed)) {
+    return { isValid: false, sanitized: '', error: 'Nome contém caracteres inválidos' };
   }
   
-  return { isValid: true, sanitized };
+  // Additional check for potential script injection patterns
+  const dangerousPatterns = /javascript:|data:|vbscript:|on\w+\s*=/i;
+  if (dangerousPatterns.test(trimmed)) {
+    return { isValid: false, sanitized: '', error: 'Nome contém caracteres inválidos' };
+  }
+  
+  return { isValid: true, sanitized: trimmed };
 }
 
 /**
