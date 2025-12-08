@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import RedeemPage from './pages/RedeemPage';
+import PrivacyPage from './pages/PrivacyPage';
 
 const App: React.FC = () => {
   return (
@@ -8,6 +9,9 @@ const App: React.FC = () => {
     // Nota: Isso requer que o servidor redirecione todas as rotas para index.html
     <BrowserRouter>
       <Routes>
+        {/* Rota de Política de Privacidade */}
+        <Route path="/privacy" element={<PrivacyPage />} />
+        
         {/* Rota correta (inglês) */}
         <Route path="/redeem/:id" element={<RedeemPage />} />
         
