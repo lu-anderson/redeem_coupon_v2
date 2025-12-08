@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import RedeemPage from './pages/RedeemPage';
 import PrivacyPage from './pages/PrivacyPage';
+import TermsPage from './pages/TermsPage';
 
 const App: React.FC = () => {
   return (
@@ -11,6 +12,9 @@ const App: React.FC = () => {
       <Routes>
         {/* Rota de Política de Privacidade */}
         <Route path="/privacy" element={<PrivacyPage />} />
+        
+        {/* Rota de Termos de Uso */}
+        <Route path="/terms" element={<TermsPage />} />
         
         {/* Rota correta (inglês) */}
         <Route path="/redeem/:id" element={<RedeemPage />} />
