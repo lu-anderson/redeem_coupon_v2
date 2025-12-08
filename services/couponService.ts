@@ -9,7 +9,6 @@ export const getCoupon = async (id: string): Promise<Coupon | null> => {
   try {
     const docRef = doc(db, COUPONS_COLLECTION, id);
     const docSnap = await getDoc(docRef);
-
     if (docSnap.exists()) {
       const data = docSnap.data();
       return {
@@ -39,7 +38,6 @@ export const getCoupon = async (id: string): Promise<Coupon | null> => {
  * 2. Allow updates only to specific fields (like quantity).
  * 3. Prevent users from modifying 'originalQuantity' or 'name'.
  */
-// TODO: Improve security with Firestore Rules
 export const redeemCoupon = async (couponId: string, userName: string): Promise<boolean> => {
   try {
     await runTransaction(db, async (transaction) => {
@@ -67,14 +65,7 @@ export const redeemCoupon = async (couponId: string, userName: string): Promise<
         }
       }
 
-      // 1. Update Coupon Quantity
-      const newQuantity = couponData.quantity - 1;
-      transaction.update(couponRef, {
-        quantity: newQuantity,
-        // If quantity hits 0, you might want to auto-deactivate, but keeping it active but 0 is okay too
-      });
-
-      // 2. Create Notification
+      // Create Notification
       // We create a new document in the notifications collection.
       // A backend function (Cloud Functions) should ideally listen to this to send the actual Push Notification via FCM.
       const notificationRef = doc(collection(db, NOTIFICATIONS_COLLECTION));
