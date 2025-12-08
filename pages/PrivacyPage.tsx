@@ -9,7 +9,7 @@ const PrivacyPage: React.FC = () => {
         </h1>
         
         <div className="text-sm text-gray-600 mb-8">
-          <p><strong>Última atualização:</strong> 07/12/2025</p>
+          <p><strong>Última atualização:</strong> DD/MM/2025</p>
           <p><strong>Aplicativo:</strong> Affetto – Cupons Afetivos</p>
           <p><strong>Desenvolvedor:</strong> Luanderson Santos</p>
           <p><strong>Idade mínima para uso:</strong> 18 anos</p>
@@ -18,7 +18,7 @@ const PrivacyPage: React.FC = () => {
         <section className="mb-8">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">1. Informações Gerais</h2>
           <p className="text-gray-700 mb-3">
-            O <strong>Affetto</strong> é um aplicativo criado para que casais possam criar, compartilhar e usar cupons afetivos.
+            O <strong>Affetto</strong> é um aplicativo criado para que casais maiores de idade possam criar, compartilhar e usar cupons afetivos.
           </p>
           <p className="text-gray-700 mb-3">
             Esta Política de Privacidade explica como os dados são coletados, utilizados e protegidos de acordo com as diretrizes da Google Play, LGPD, GDPR e demais regulamentações aplicáveis.
@@ -153,7 +153,7 @@ const PrivacyPage: React.FC = () => {
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">10. Exclusão de Conta e Dados</h2>
           <p className="text-gray-700 mb-3">Para solicitar exclusão de todos os seus dados:</p>
           <p className="text-gray-700 mb-4">
-            📧 <a href="mailto:luanderson.engsoftware@gmal.com" className="text-blue-600 hover:underline">luanderson.engsoftware@gmal.com</a>
+            📧 <a href="mailto:luanderson.dev@gmail.com" className="text-blue-600 hover:underline">luanderson.dev@gmail.com</a>
           </p>
           <p className="text-gray-700 mb-3">A exclusão inclui:</p>
           <ul className="list-disc list-inside text-gray-700 space-y-2">
@@ -169,7 +169,7 @@ const PrivacyPage: React.FC = () => {
           <p className="text-gray-700 mb-2">Para dúvidas sobre privacidade ou solicitações formais:</p>
           <p className="text-gray-700">
             <strong>Luanderson Santos</strong><br />
-            📧 <a href="mailto:luanderson.engsoftware@gmal.com" className="text-blue-600 hover:underline">luanderson.engsoftware@gmal.com</a>
+            📧 <a href="mailto:luanderson.dev@gmail.com" className="text-blue-600 hover:underline">luanderson.dev@gmail.com</a>
           </p>
         </section>
 
