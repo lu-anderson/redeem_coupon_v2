@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import RedeemPage from './pages/RedeemPage';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
+import DeleteAccountPage from './pages/DeleteAccountPage';
 
 const App: React.FC = () => {
   return (
@@ -15,6 +16,9 @@ const App: React.FC = () => {
         
         {/* Rota de Termos de Uso */}
         <Route path="/terms" element={<TermsPage />} />
+        
+        {/* Rota de Exclusão de Conta */}
+        <Route path="/delete-account" element={<DeleteAccountPage />} />
         
         {/* Rota correta (inglês) */}
         <Route path="/redeem/:id" element={<RedeemPage />} />

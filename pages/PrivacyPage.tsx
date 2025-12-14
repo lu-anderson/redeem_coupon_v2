@@ -151,7 +151,19 @@ const PrivacyPage: React.FC = () => {
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">10. Exclusão de Conta e Dados</h2>
-          <p className="text-gray-700 mb-3">Para solicitar exclusão de todos os seus dados:</p>
+          <p className="text-gray-700 mb-3">
+            Você pode solicitar a exclusão completa da sua conta e de todos os dados associados a qualquer momento.
+          </p>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <p className="text-blue-900 font-semibold mb-2">📝 Solicite a exclusão online:</p>
+            <a 
+              href="/delete-account" 
+              className="text-blue-600 hover:text-blue-800 underline font-medium"
+            >
+              Acessar página de solicitação de exclusão de conta →
+            </a>
+          </div>
+          <p className="text-gray-700 mb-3">Ou entre em contato por e-mail:</p>
           <p className="text-gray-700 mb-4">
             📧 <a href="mailto:luanderson.engsoftware@gmail.com" className="text-blue-600 hover:underline">luanderson.engsoftware@gmail.com</a>
           </p>

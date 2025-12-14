@@ -28,6 +28,20 @@ declare module 'firebase/firestore' {
     id: string;
     ref: DocumentReference<T>;
   }
+
+  export interface QueryDocumentSnapshot<T = any> extends DocumentSnapshot<T> {
+    data(): T;
+  }
+
+  export interface QuerySnapshot<T = any> {
+    empty: boolean;
+    docs: QueryDocumentSnapshot<T>[];
+    size: number;
+  }
+
+  export interface Query<T = any> {}
+
+  export interface QueryConstraint {}
   
   export interface Transaction {
     get<T>(documentRef: DocumentReference<T>): Promise<DocumentSnapshot<T>>;
@@ -42,8 +56,12 @@ declare module 'firebase/firestore' {
   export function doc(collectionRef: CollectionReference): DocumentReference;
   export function collection(firestore: Firestore, path: string, ...pathSegments: string[]): CollectionReference;
   export function getDoc<T = any>(reference: DocumentReference<T>): Promise<DocumentSnapshot<T>>;
+  export function getDocs<T = any>(query: Query<T> | CollectionReference<T>): Promise<QuerySnapshot<T>>;
   export function runTransaction<T>(firestore: Firestore, updateFunction: (transaction: Transaction) => Promise<T>): Promise<T>;
   export function serverTimestamp(): any;
   // addDoc is not included here as we removed it from usage, but we can add it if needed
   export function addDoc(collectionRef: CollectionReference, data: any): Promise<DocumentReference>;
+  export function updateDoc(docRef: DocumentReference, data: any): Promise<void>;
+  export function query<T = any>(query: CollectionReference<T> | Query<T>, ...queryConstraints: QueryConstraint[]): Query<T>;
+  export function where(fieldPath: string, opStr: string, value: any): QueryConstraint;
 }
