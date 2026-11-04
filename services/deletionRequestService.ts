@@ -6,7 +6,7 @@ import {
   where, 
   getDocs, 
 } from 'firebase/firestore';
-import { db } from './firebase';
+import { requireDb } from './firebase';
 
 export interface DeletionRequest {
   email: string;
@@ -26,9 +26,11 @@ const DELETION_REQUESTS_COLLECTION = 'deletion_requests';
  */
 export const createDeletionRequest = async (email: string): Promise<null> => {
   try {
+    const firestore = requireDb();
+
     // Verificar se já existe uma solicitação pendente para este email
     const existingRequestsQuery = query(
-      collection(db, DELETION_REQUESTS_COLLECTION),
+      collection(firestore, DELETION_REQUESTS_COLLECTION),
       where('email', '==', email.toLowerCase()),
       where('status', '==', 'pending')
     );
@@ -43,7 +45,7 @@ export const createDeletionRequest = async (email: string): Promise<null> => {
   
 
     // Criar a solicitação no Firestore
-    await addDoc(collection(db, DELETION_REQUESTS_COLLECTION), {
+    await addDoc(collection(firestore, DELETION_REQUESTS_COLLECTION), {
       email: email.toLowerCase(),
       requestedAt: serverTimestamp(),
       status: 'pending',
@@ -53,7 +55,6 @@ export const createDeletionRequest = async (email: string): Promise<null> => {
 
     return null;
   } catch (error) {
-    console.log(error)
     console.error('Erro ao criar solicitação de exclusão:', error);
     throw error;
   }

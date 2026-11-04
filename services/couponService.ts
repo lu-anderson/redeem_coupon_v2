@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { requireDb } from './firebase';
 import { doc, getDoc, runTransaction, collection, serverTimestamp } from 'firebase/firestore';
 import { Coupon, Notification } from '../types';
 
@@ -6,8 +6,9 @@ const COUPONS_COLLECTION = 'coupons';
 const NOTIFICATIONS_COLLECTION = 'notifications';
 
 export const getCoupon = async (id: string): Promise<Coupon | null> => {
+  const firestore = requireDb();
   try {
-    const docRef = doc(db, COUPONS_COLLECTION, id);
+    const docRef = doc(firestore, COUPONS_COLLECTION, id);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       const data = docSnap.data();
@@ -39,9 +40,10 @@ export const getCoupon = async (id: string): Promise<Coupon | null> => {
  * 3. Prevent users from modifying 'originalQuantity' or 'name'.
  */
 export const redeemCoupon = async (couponId: string, userName: string): Promise<boolean> => {
+  const firestore = requireDb();
   try {
-    await runTransaction(db, async (transaction) => {
-      const couponRef = doc(db, COUPONS_COLLECTION, couponId);
+    await runTransaction(firestore, async (transaction) => {
+      const couponRef = doc(firestore, COUPONS_COLLECTION, couponId);
       const couponDoc = await transaction.get(couponRef);
 
       if (!couponDoc.exists()) {
@@ -68,7 +70,7 @@ export const redeemCoupon = async (couponId: string, userName: string): Promise<
       // Create Notification
       // We create a new document in the notifications collection.
       // A backend function (Cloud Functions) should ideally listen to this to send the actual Push Notification via FCM.
-      const notificationRef = doc(collection(db, NOTIFICATIONS_COLLECTION));
+      const notificationRef = doc(collection(firestore, NOTIFICATIONS_COLLECTION));
       const notificationData: Omit<Notification, 'id'> = {
         userId: couponData.userId, // The owner of the coupon receives the notification
         type: 'coupon_used',
