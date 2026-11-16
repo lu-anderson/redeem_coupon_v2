@@ -3,29 +3,59 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cupons do Amor - Resgate</title>
+    <title>Affetto - Resgate</title>
+    <meta name="theme-color" content="#4B2E5C" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script>
+      // Affetto design tokens (spec 020). Same values as the app's src/theme/colors.ts.
       tailwind.config = {
         theme: {
           extend: {
             fontFamily: {
-              sans: ['Nunito', 'sans-serif'],
+              sans: ['Nunito', 'system-ui', 'sans-serif'],
             },
             colors: {
-              love: {
-                DEFAULT: '#FF6B9D',
-                light: '#FFB3BA',
+              primary: {
+                DEFAULT: '#4B2E5C',
+                on: '#FBF8FD',
+                soft: '#E4DAEC',
+                pressed: '#3A2249',
               },
-              cat: {
-                carinho: '#FFB3BA',
-                romance: '#FFFFBA',
-                aventura: '#FFDFBA',
-                diversao: '#BAFFC9',
-                surpresa: '#BAE1FF',
-              }
-            }
+              lilac: '#EEE8F3',
+              canvas: '#FAF8FB',
+              muted: '#F5F1F8',
+              ink: {
+                DEFAULT: '#231A2B',
+                soft: '#6B6170',
+                placeholder: '#A69DAE',
+              },
+              line: {
+                DEFAULT: '#E6E0EB',
+                dashed: '#C9BFD1',
+              },
+              success: {
+                DEFAULT: '#3F7A57',
+                surface: '#E6F1EA',
+              },
+              waiting: {
+                DEFAULT: '#6B6170',
+                surface: '#EFEBF2',
+              },
+              danger: {
+                DEFAULT: '#B3261E',
+                surface: '#FBEAE8',
+              },
+              disabled: {
+                surface: '#ECE7F0',
+                text: '#A69DAE',
+              },
+            },
+            boxShadow: {
+              card: '0 14px 34px rgba(75,46,92,.10)',
+              button: '0 6px 16px rgba(75,46,92,.18)',
+              tile: '0 10px 24px rgba(75,46,92,.18)',
+            },
           }
         }
       }

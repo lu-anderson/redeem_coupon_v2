@@ -4,6 +4,7 @@ import RedeemPage from './pages/RedeemPage';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
 import DeleteAccountPage from './pages/DeleteAccountPage';
+import BrandSymbol from './components/BrandSymbol';
 
 const App: React.FC = () => {
   return (
@@ -28,8 +29,9 @@ const App: React.FC = () => {
 
         {/* Página inicial ou fallback */}
         <Route path="/" element={
-          <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA] text-gray-400">
-            <p>Link inválido. Por favor, use o link compartilhado com você.</p>
+          <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-canvas px-8 text-center">
+            <BrandSymbol width={40} />
+            <p className="max-w-[260px] text-sm text-ink-soft">Link inválido. Por favor, use o link compartilhado com você.</p>
           </div>
         } />
         

@@ -33,6 +33,9 @@ export interface Coupon {
   icon?: string;
   color?: string;
   observations?: string;
+  /** Picante (18+) only: unmasked texts, when the coupon document carries them. */
+  premiumName?: string;
+  premiumDescription?: string;
 }
 
 export interface Notification {
