@@ -5,9 +5,14 @@ import { assertFirebaseConfigured } from '../services/firebase';
 import { Coupon } from '../types';
 import CouponCard from '../components/CouponCard';
 import confetti from 'canvas-confetti';
-import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { CircleAlert, Check, Download, Gift, LoaderCircle, RotateCw, TicketX, User } from 'lucide-react';
+import BrandHeader from '../components/BrandHeader';
+import CouponArt, { artKeyFor } from '../components/CouponArt';
+import RarityTag from '../components/RarityTag';
+import { ObservationsBox } from '../components/CouponCard';
+import { appStoreUrlFor } from '../utils/storeLinks';
 import { COUPON_FETCH_TIMEOUT_MS, withTimeout } from '../utils/withTimeout';
-import { resolveCouponVisuals } from '../utils/couponDisplay';
+import { resolveCouponTexts, resolveCouponVisuals } from '../utils/couponDisplay';
 
 function isFirebaseConfigError(error: unknown): boolean {
   return error instanceof Error && error.name === 'FirebaseConfigError';
@@ -95,7 +100,7 @@ const RedeemPage: React.FC = () => {
         particleCount: 150,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ['#FF6B9D', '#FFB3BA', '#ffffff']
+        colors: ['#4B2E5C', '#E4DAEC', '#EEE8F3', '#ffffff']
       });
     } catch (err: unknown) {
       const message = isFirebaseConfigError(err)
@@ -109,156 +114,189 @@ const RedeemPage: React.FC = () => {
     }
   };
 
+  const openStore = () => {
+    const touchPoints = typeof navigator.maxTouchPoints === 'number' ? navigator.maxTouchPoints : 0;
+    window.open(appStoreUrlFor(navigator.userAgent, touchPoints), '_blank', 'noopener');
+  };
+
   if (loading) {
     return (
       <div
-        className="min-h-screen bg-[#FAFAFA] flex items-center justify-center"
+        className="min-h-screen bg-canvas flex items-center justify-center"
         role="status"
         aria-label="Carregando cupom"
       >
-        <Loader2 className="w-10 h-10 text-love animate-spin" />
+        <LoaderCircle className="w-9 h-9 text-primary animate-spin" strokeWidth={2} aria-hidden="true" />
       </div>
     );
   }
 
   if (error || !coupon) {
     return (
-      <div className="min-h-screen bg-[#FAFAFA] flex flex-col items-center justify-center p-4 text-center" role="alert">
-        <AlertCircle className="w-16 h-16 text-gray-300 mb-4" />
-        <h1 className="text-2xl font-bold text-gray-700 mb-2">Ops! Algo deu errado</h1>
-        <p className="text-gray-500 max-w-md">{error || 'Não conseguimos encontrar esse cupom.'}</p>
-        <button
-          type="button"
-          onClick={handleRetry}
-          className="mt-6 px-5 py-3 bg-love text-white rounded-xl font-bold hover:bg-love-light transition-all"
-        >
-          Tentar novamente
-        </button>
-        <Link to="/" className="mt-4 text-love font-bold hover:underline">Voltar ao início</Link>
-      </div>
+      <PageShell>
+        <div className="flex-1 flex flex-col items-center justify-center px-6 pb-16 text-center" role="alert">
+          <div className="w-20 h-20 rounded-[24px] bg-lilac flex items-center justify-center mb-6">
+            <CircleAlert className="w-9 h-9 text-primary" strokeWidth={1.5} aria-hidden="true" />
+          </div>
+          <h1 className="text-[22px] font-extrabold text-ink mb-2">Ops! Algo deu errado</h1>
+          <p className="text-[15px] text-ink-soft max-w-md">{error || 'Não conseguimos encontrar esse cupom.'}</p>
+          <button
+            type="button"
+            onClick={handleRetry}
+            className={`${PRIMARY_BUTTON} mt-6 max-w-[300px]`}
+          >
+            <RotateCw className="w-5 h-5" aria-hidden="true" />
+            Tentar novamente
+          </button>
+          <Link to="/" className="mt-4 text-[15px] font-extrabold text-primary hover:underline">
+            Voltar ao início
+          </Link>
+        </div>
+      </PageShell>
     );
   }
 
   if (success) {
     const visuals = resolveCouponVisuals(coupon);
+    const texts = resolveCouponTexts(coupon);
 
     return (
-      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex flex-col items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-3xl shadow-xl text-center max-w-md w-full animate-fade-in-up border-t-8" style={{ borderColor: visuals.color }}>
-
-          <div
-            className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg relative"
-            style={{ backgroundColor: visuals.color }}
-          >
-            <span className="text-4xl">{visuals.icon || '❤️'}</span>
-            <div className="absolute -bottom-2 -right-2 bg-green-500 text-white p-2 rounded-full border-4 border-white">
-              <CheckCircle2 className="w-6 h-6" />
+      <PageShell>
+        <div className="flex-1 flex justify-center px-5 pt-6 pb-10 lg:pt-10">
+          <div className="w-full max-w-[440px] flex flex-col items-center gap-3 text-center">
+            <div className="relative">
+              <div className="w-24 h-24 rounded-full bg-white shadow-tile flex items-center justify-center">
+                <CouponArt artKey={artKeyFor(coupon.name, coupon.category)} size={44} />
+              </div>
+              <span className="absolute -right-0.5 -bottom-0.5 w-[34px] h-[34px] rounded-full bg-success border-[3px] border-white flex items-center justify-center">
+                <Check className="w-4 h-4 text-white" strokeWidth={3} aria-hidden="true" />
+              </span>
             </div>
-          </div>
 
-          <h1 className="text-3xl font-extrabold text-gray-800 mb-2">Resgatado!</h1>
+            <h1 className="text-[28px] font-extrabold tracking-[-.3px] text-ink">Resgatado!</h1>
 
-          {visuals.rarity && (
-            <div className="text-yellow-500 text-xl mb-4 font-bold tracking-widest">
-              {visuals.rarity}
-            </div>
-          )}
+            <RarityTag rarity={visuals.rarity} />
 
-          <p className="text-gray-600 mb-8">
-            Oba! O cupom <strong>{coupon.name}</strong> foi validado com sucesso. Aproveite seu momento! ❤️
-          </p>
-
-          {visuals.observations && (
-            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-100 rounded-xl text-left mb-6">
-              <p className="text-xs text-yellow-700 font-bold mb-1 uppercase">Observações:</p>
-              <p className="text-gray-600 text-sm">
-                {visuals.observations}
-              </p>
-            </div>
-          )}
-
-          <div className="bg-pink-50 rounded-2xl p-6 mb-6 border border-pink-100">
-            <p className="text-gray-700 font-medium mb-4 text-sm">
-              Gostou da surpresa? 😍<br />
-              Crie também momentos inesquecíveis para quem você ama!
+            <p className="text-[15px] text-ink-soft">
+              Oba! O cupom <strong className="text-ink">{texts.name}</strong> foi validado com sucesso. Aproveite seu momento!
             </p>
+
+            {visuals.observations && (
+              <div className="w-full">
+                <ObservationsBox text={visuals.observations} />
+              </div>
+            )}
+
+            <div className="w-full bg-white border border-line rounded-[20px] p-4 flex flex-col gap-3">
+              <p className="text-sm font-semibold text-ink">
+                Gostou da surpresa?<br />
+                Crie também momentos inesquecíveis para quem você ama!
+              </p>
+              <button type="button" onClick={openStore} className={PRIMARY_BUTTON}>
+                <Download className="w-5 h-5" aria-hidden="true" />
+                Baixar o App
+              </button>
+            </div>
+
             <button
-              onClick={() => window.open('https://play.google.com/store/apps/details?id=com.cuponsdoamor', '_blank')}
-              className="block w-full py-3 bg-love text-white rounded-xl font-bold hover:bg-love-light hover:shadow-love/40 transition-all shadow-lg transform active:scale-95"
+              type="button"
+              onClick={() => window.close()}
+              className="text-sm font-bold text-ink-soft underline hover:text-ink transition-colors"
             >
-              Baixar o App
+              Fechar Janela
             </button>
           </div>
-
-          <button
-            onClick={() => window.close()}
-            className="text-gray-400 text-sm font-medium hover:text-gray-600 transition-colors underline"
-          >
-            Fechar Janela
-          </button>
         </div>
-      </div>
+      </PageShell>
     );
   }
 
   const canRedeem = coupon.isActive === true && typeof coupon.quantity === 'number' && coupon.quantity > 0;
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] py-10 px-4 flex flex-col items-center">
-      <div className="w-full max-w-md space-y-8">
-
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-extrabold text-gray-800">Resgatar Cupom</h1>
-          <p className="text-gray-500">Você recebeu um gesto de carinho!</p>
-        </div>
-
-        <CouponCard coupon={coupon} />
-
-        {canRedeem ? (
-          <form onSubmit={handleRedeem} className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 space-y-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-semibold text-gray-600 mb-2">
-                Quem vai aproveitar?
-              </label>
-              <input
-                id="name"
-                type="text"
-                required
-                value={userName}
-                onChange={(e) => setUserName(e.target.value)}
-                placeholder="Seu nome ou apelido carinhoso..."
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-love focus:ring-2 focus:ring-love/20 outline-none transition-all placeholder:text-gray-300"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={redeeming}
-              className={`w-full py-4 rounded-xl font-bold text-white shadow-lg transition-all transform active:scale-95 flex items-center justify-center gap-2
-                ${redeeming ? 'bg-love/70 cursor-wait' : 'bg-love hover:bg-love-light hover:shadow-love/40'}
-              `}
-            >
-              {redeeming ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" /> Processando...
-                </>
-              ) : (
-                'Resgatar Agora ❤️'
-              )}
-            </button>
-            <p className="text-xs text-center text-gray-400 mt-2">
-              Uma notificação será enviada para quem emitiu.
-            </p>
-          </form>
-        ) : (
-          <div className="bg-gray-100 p-6 rounded-3xl text-center text-gray-500">
-            <p className="font-semibold">Este cupom não está mais disponível.</p>
-            <p className="text-sm">Ele já foi usado ou expirou.</p>
+    <PageShell>
+      <div className="flex-1 flex justify-center px-5 pt-4 pb-10 lg:items-center lg:py-12">
+        <div className="w-full max-w-md self-start content-start grid grid-cols-1 gap-4 lg:self-center lg:max-w-none lg:w-auto lg:grid-cols-[480px_440px] lg:gap-x-20 lg:gap-y-6">
+          <div className="lg:col-start-1 lg:row-start-1 lg:self-end">
+            <h1 className="text-[28px] leading-9 font-extrabold tracking-[-.3px] text-ink lg:text-[44px] lg:leading-[52px]">
+              Resgatar Cupom
+            </h1>
+            <p className="text-[15px] text-ink-soft lg:text-lg">Você recebeu um gesto de carinho!</p>
           </div>
-        )}
+
+          <div className="lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:self-center">
+            <CouponCard coupon={coupon} dimmed={!canRedeem} />
+          </div>
+
+          <div className="lg:col-start-1 lg:row-start-2 lg:self-start">
+            {canRedeem ? (
+              <form
+                onSubmit={handleRedeem}
+                className="bg-white border border-line rounded-[24px] p-[18px] flex flex-col gap-2.5"
+              >
+                <label htmlFor="name" className="text-sm font-bold leading-5 text-ink">
+                  Quem vai aproveitar?
+                </label>
+                <div className="relative">
+                  <User
+                    className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-soft pointer-events-none"
+                    strokeWidth={1.75}
+                    aria-hidden="true"
+                  />
+                  <input
+                    id="name"
+                    type="text"
+                    required
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    placeholder="Seu nome ou apelido carinhoso..."
+                    disabled={redeeming}
+                    className="w-full h-[54px] rounded-[14px] bg-white border-[1.5px] border-line pl-12 pr-4 text-[15px] text-ink outline-none transition-all placeholder:text-ink-placeholder focus:border-primary focus:ring-4 focus:ring-primary/30 disabled:bg-disabled-surface disabled:text-disabled-text"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={redeeming}
+                  className={`${PRIMARY_BUTTON} ${redeeming ? 'opacity-90 cursor-wait' : ''}`}
+                >
+                  {redeeming ? (
+                    <>
+                      <LoaderCircle className="w-5 h-5 animate-spin" aria-hidden="true" /> Processando...
+                    </>
+                  ) : (
+                    <>
+                      <Gift className="w-5 h-5" aria-hidden="true" /> Resgatar Agora
+                    </>
+                  )}
+                </button>
+                <p className="text-xs text-center text-ink-soft">Uma notificação será enviada para quem emitiu.</p>
+              </form>
+            ) : (
+              <div className="flex items-center gap-3 bg-waiting-surface rounded-[18px] px-4 py-3.5">
+                <TicketX className="w-6 h-6 text-ink flex-none" strokeWidth={1.75} aria-hidden="true" />
+                <div className="flex flex-col text-left">
+                  <p className="text-[15px] font-bold text-ink">Este cupom não está mais disponível.</p>
+                  <p className="text-[13px] text-ink-soft">Ele já foi usado ou expirou.</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </PageShell>
   );
 };
+
+const PRIMARY_BUTTON =
+  'w-full h-[54px] rounded-2xl bg-primary text-primary-on font-bold text-base shadow-button flex items-center justify-center gap-2.5 transition-all hover:bg-primary-pressed active:scale-[.98] active:bg-primary-pressed focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/30';
+
+/** Brand header plus the page background (gradient on desktop, as in G17D). */
+const PageShell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div className="min-h-screen flex flex-col bg-canvas text-ink">
+    <BrandHeader />
+    <main className="flex-1 flex flex-col lg:bg-gradient-to-br lg:from-[#F3EDF7] lg:to-[#FAF8FB]">{children}</main>
+  </div>
+);
 
 export default RedeemPage;

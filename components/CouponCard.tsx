@@ -1,102 +1,92 @@
 import React from 'react';
-import { Coupon, CouponCategory } from '../types';
-import { Heart, Star, Zap, Smile, Moon, Gift } from 'lucide-react';
-import { availableQuantity, resolveCouponVisuals } from '../utils/couponDisplay';
+import { Coupon } from '../types';
+import { availableQuantity, resolveCouponTexts, resolveCouponVisuals } from '../utils/couponDisplay';
+import CouponArt, { artKeyFor } from './CouponArt';
+import RarityTag from './RarityTag';
 
 interface CouponCardProps {
   coupon: Coupon;
+  /** Unavailable coupons are drawn dimmed (G17-05). */
+  dimmed?: boolean;
 }
 
-const getLegacyCategoryIcon = (category: CouponCategory) => {
-  switch (category) {
-    case 'carinho': return <Heart className="text-pink-500" fill="currentColor" />;
-    case 'romance': return <Heart className="text-yellow-500" fill="currentColor" />;
-    case 'aventura': return <Zap className="text-orange-400" fill="currentColor" />;
-    case 'diversao': return <Smile className="text-green-500" />;
-    case 'surpresa': return <Gift className="text-blue-400" />;
-    case 'noite-livre': return <Moon className="text-slate-500" />;
-    default: return <Star />;
-  }
-};
+/** Ticket notch on the card edge, at the header/body boundary. */
+const Notch: React.FC<{ side: 'left' | 'right' }> = ({ side }) => (
+  <span
+    aria-hidden="true"
+    className={`absolute top-[84px] -mt-[9px] w-[18px] h-[18px] rounded-full bg-canvas border border-line z-10 ${
+      side === 'left' ? '-left-[9px]' : '-right-[9px]'
+    }`}
+  />
+);
 
-const CouponCard: React.FC<CouponCardProps> = ({ coupon }) => {
+const CouponCard: React.FC<CouponCardProps> = ({ coupon, dimmed = false }) => {
   const visuals = resolveCouponVisuals(coupon);
-  const displayIcon = visuals.icon || getLegacyCategoryIcon(coupon.category);
+  const texts = resolveCouponTexts(coupon);
   const available = availableQuantity(coupon.quantity);
 
   return (
-    <div className="relative w-full max-w-sm mx-auto transform transition-all hover:scale-105 duration-300">
-      {/* Ticket perforation circles */}
-      <div className="absolute -left-3 top-1/2 w-6 h-6 bg-[#FAFAFA] rounded-full z-10"></div>
-      <div className="absolute -right-3 top-1/2 w-6 h-6 bg-[#FAFAFA] rounded-full z-10"></div>
+    <div
+      className={`relative w-full bg-white border border-line rounded-[24px] shadow-card ${dimmed ? 'opacity-60' : ''}`}
+      data-testid="coupon-card"
+    >
+      <Notch side="left" />
+      <Notch side="right" />
 
-      <div className={`rounded-3xl shadow-xl overflow-hidden bg-white border-2 border-opacity-50 border-gray-100`}>
-        {/* Header */}
-        <div
-          className="p-6 flex items-center justify-between relative overflow-hidden"
-          style={{ backgroundColor: visuals.color }}
-          data-testid="coupon-card-header"
-        >
-          {/* Rarity Stars Background Pattern (Optional) */}
-          {visuals.rarity && (
-            <div className="absolute top-0 right-0 p-2 opacity-20 text-4xl select-none pointer-events-none">
-              {visuals.rarity}
-            </div>
-          )}
+      {/* Header */}
+      <div
+        className="h-[84px] flex items-center justify-between gap-3 bg-lilac rounded-t-[24px] px-[18px]"
+        data-testid="coupon-card-header"
+      >
+        <div className="w-12 h-12 rounded-[14px] bg-white flex items-center justify-center flex-none">
+          <CouponArt artKey={artKeyFor(coupon.name, coupon.category)} size={28} />
+        </div>
 
-          <div className="bg-white/50 p-3 rounded-full backdrop-blur-sm shadow-sm text-2xl w-12 h-12 flex items-center justify-center">
-            {displayIcon}
+        <div className="flex flex-col items-end gap-1.5 min-w-0">
+          <span className="text-[11px] font-extrabold tracking-[.6px] uppercase text-primary bg-white/70 px-2.5 py-1 rounded-full text-right">
+            {visuals.categoryLabel}
+          </span>
+          <RarityTag rarity={visuals.rarity} />
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="px-[18px] pt-4 pb-[18px] flex flex-col gap-3 text-center">
+        <h2 className="text-[22px] leading-7 font-extrabold text-ink">{texts.name}</h2>
+
+        {texts.description && (
+          <p className="text-sm text-ink-soft" data-testid="coupon-premium-description">
+            {texts.description}
+          </p>
+        )}
+
+        <div className="border-t border-dashed border-line-dashed" aria-hidden="true" />
+
+        <div className="grid grid-cols-2 gap-2.5">
+          <div className="bg-muted rounded-[14px] p-2 flex flex-col">
+            <span className="text-xs font-bold text-ink-soft">Disponíveis</span>
+            <span className="text-xl font-extrabold text-primary">{available}</span>
           </div>
-
-          <div className="flex flex-col items-end">
-            <span className="text-gray-800 font-bold uppercase tracking-wider text-xs bg-white/40 px-3 py-1 rounded-full mb-1">
-              {visuals.categoryLabel}
-            </span>
-            {visuals.rarity && (
-              <span className="text-yellow-500 font-bold text-sm drop-shadow-sm filter">
-                {visuals.rarity}
-              </span>
-            )}
+          <div className="bg-muted rounded-[14px] p-2 flex flex-col">
+            <span className="text-xs font-bold text-ink-soft">Validade</span>
+            <span className="text-[17px] leading-7 font-extrabold text-ink">{visuals.expirationLabel}</span>
           </div>
         </div>
 
-        {/* Content */}
-        <div className="p-6 text-center space-y-4">
-          <h2 className="text-2xl font-bold text-gray-800 leading-tight">
-            {coupon.name}
-          </h2>
+        {coupon.message && <p className="italic text-sm text-ink-soft">"{coupon.message}"</p>}
 
-          <div className="w-full h-px bg-gray-100 my-4 dashed-line"></div>
-
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="flex flex-col items-center p-2 bg-gray-50 rounded-xl">
-              <span className="text-gray-400 text-xs mb-1">Disponíveis</span>
-              <span className="font-bold text-xl text-love">{available}</span>
-            </div>
-            <div className="flex flex-col items-center p-2 bg-gray-50 rounded-xl">
-              <span className="text-gray-400 text-xs mb-1">Validade</span>
-              <span className="font-bold text-gray-700">{visuals.expirationLabel}</span>
-            </div>
-          </div>
-
-          {coupon.message && (
-            <p className="text-gray-500 italic text-sm mt-4">
-              "{coupon.message}"
-            </p>
-          )}
-
-          {visuals.observations && (
-            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-100 rounded-xl text-left">
-              <p className="text-xs text-yellow-700 font-bold mb-1 uppercase">Observações:</p>
-              <p className="text-gray-600 text-sm">
-                {visuals.observations}
-              </p>
-            </div>
-          )}
-        </div>
+        {visuals.observations && <ObservationsBox text={visuals.observations} />}
       </div>
     </div>
   );
 };
+
+/** "Observações" box shared by the card and the success state. */
+export const ObservationsBox: React.FC<{ text: string }> = ({ text }) => (
+  <div className="text-left bg-muted border border-primary-soft rounded-[14px] px-3 py-2.5">
+    <p className="text-[11px] font-extrabold tracking-[.6px] uppercase text-primary">Observações:</p>
+    <p className="text-sm text-ink-soft mt-0.5">{text}</p>
+  </div>
+);
 
 export default CouponCard;

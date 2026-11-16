@@ -1,4 +1,5 @@
 import { couponCategories } from '../constants/coupons';
+import { PREMIUM_TEXTS } from '../constants/premiumTexts';
 import { Coupon } from '../types';
 
 const LEGACY_CATEGORY_COLORS: Record<string, string> = {
@@ -117,4 +118,24 @@ export function resolveCouponVisuals(
 
 export function availableQuantity(quantity: unknown): number {
   return typeof quantity === 'number' && Number.isFinite(quantity) ? quantity : 0;
+}
+
+export interface CouponTexts {
+  /** Name to show; the unmasked premium name for Picante (18+) coupons. */
+  name: string;
+  /** Premium description, only for Picante (18+) coupons. */
+  description?: string;
+}
+
+/**
+ * Picante (18+) coupons store the masked template name ("Pedido ********
+ * Específico"). The redeem page shows `premiumName`/`premiumDescription`:
+ * the coupon document's own fields first, then the bundled seed keyed by the
+ * stored name. Other coupons show their stored name.
+ */
+export function resolveCouponTexts(coupon: Pick<Coupon, 'name' | 'premiumName' | 'premiumDescription'>): CouponTexts {
+  const seed = PREMIUM_TEXTS[coupon.name];
+  const name = nonEmptyString(coupon.premiumName) || nonEmptyString(seed?.name) || coupon.name;
+  const description = nonEmptyString(coupon.premiumDescription) || nonEmptyString(seed?.description);
+  return description ? { name, description } : { name };
 }
