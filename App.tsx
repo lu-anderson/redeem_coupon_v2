@@ -4,38 +4,22 @@ import RedeemPage from './pages/RedeemPage';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
 import DeleteAccountPage from './pages/DeleteAccountPage';
-import BrandSymbol from './components/BrandSymbol';
+import HomePage from './pages/HomePage';
 
 const App: React.FC = () => {
   return (
-    // BrowserRouter permite URLs no formato https://dominio/redeem/id
-    // Nota: Isso requer que o servidor redirecione todas as rotas para index.html
+    // BrowserRouter supports share links at https://<host>/redeem/<couponId>.
+    // The host must fall back to index.html for app routes. Real files, including
+    // the Search Console verification file, are served as themselves.
     <BrowserRouter>
       <Routes>
-        {/* Rota de Política de Privacidade */}
         <Route path="/privacy" element={<PrivacyPage />} />
-        
-        {/* Rota de Termos de Uso */}
         <Route path="/terms" element={<TermsPage />} />
-        
-        {/* Rota de Exclusão de Conta */}
         <Route path="/delete-account" element={<DeleteAccountPage />} />
-        
-        {/* Rota correta (inglês) */}
         <Route path="/redeem/:id" element={<RedeemPage />} />
-        
-        {/* Rota alternativa para suportar o erro de digitação comum 'reedem' mencionado na descrição */}
+        {/* Older shared links used this spelling. Keep it working. */}
         <Route path="/reedem/:id" element={<RedeemPage />} />
-
-        {/* Página inicial ou fallback */}
-        <Route path="/" element={
-          <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-canvas px-8 text-center">
-            <BrandSymbol width={40} />
-            <p className="max-w-[260px] text-sm text-ink-soft">Link inválido. Por favor, use o link compartilhado com você.</p>
-          </div>
-        } />
-        
-        {/* Redireciona qualquer outra rota desconhecida para a home */}
+        <Route path="/" element={<HomePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
