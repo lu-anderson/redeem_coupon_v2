@@ -69,7 +69,7 @@ const DeleteAccountPage: React.FC = () => {
           
           <ol className="list-decimal list-inside text-gray-700 space-y-3 mb-6">
             <li className="pl-2">
-              <strong>Informe o e-mail da sua conta:</strong> Insira no formulário abaixo o endereço de e-mail que você utilizou para criar sua conta no Affetto (Google ou Apple Sign-In).
+              <strong>Informe o e-mail da sua conta:</strong> Insira no formulário abaixo o endereço de e-mail vinculado à sua conta no Affetto (cadastro com e-mail/senha, Google Sign-In ou Sign in with Apple). Se você ocultou o e-mail no login com a Apple, use o endereço de retransmissão privada da Apple (terminado em privaterelay.appleid.com).
             </li>
             <li className="pl-2">
               <strong>Envie a solicitação:</strong> Clique no botão "Enviar Solicitação" para confirmar.
@@ -92,8 +92,11 @@ const DeleteAccountPage: React.FC = () => {
             <li>Histórico de cupons resgatados</li>
             <li>Mensagens e personalizações associadas à sua conta</li>
             <li>Preferências e configurações do aplicativo</li>
-            <li>Dados de autenticação (Google ou Apple Sign-In)</li>
+            <li>Dados de autenticação (conta e-mail/senha, Google Sign-In ou Sign in with Apple)</li>
           </ul>
+          <p className="text-gray-700 text-sm">
+            Se a sua conta foi criada com Sign in with Apple, recomendamos também revogar o acesso do Affetto em Ajustes &gt; [seu nome] &gt; Iniciar Sessão com a Apple &gt; Affetto &gt; Deixar de usar o ID Apple. Se você excluir a conta pelo aplicativo no iOS, essa revogação é feita automaticamente após a confirmação com a Apple.
+          </p>
         </section>
 
         <section className="mb-8">
@@ -160,7 +163,7 @@ const DeleteAccountPage: React.FC = () => {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
               />
               <p className="text-sm text-gray-500 mt-2">
-                Este deve ser o mesmo e-mail usado para fazer login no aplicativo (Google ou Apple).
+                Este deve ser o mesmo e-mail usado para fazer login no aplicativo (e-mail/senha, Google Sign-In ou Sign in with Apple, inclusive o e-mail privado da Apple, se for o caso).
               </p>
             </div>
 

@@ -5,12 +5,12 @@ const PrivacyPage: React.FC = () => {
     <div className="min-h-screen bg-[#FAFAFA] py-8 px-4">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm p-6 md:p-12">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          📜 Política de Privacidade – Affetto (Google Play)
+          📜 Política de Privacidade – Affetto
         </h1>
         
         <div className="text-sm text-gray-600 mb-8">
-          <p><strong>Última atualização:</strong> 08/12/2025 </p>
-          <p><strong>Aplicativo:</strong> Affetto – Cupons Afetivos</p>
+          <p><strong>Última atualização:</strong> 23/11/2026</p>
+          <p><strong>Aplicativo:</strong> Affetto – Cupons Afetivos (Google Play e App Store)</p>
           <p><strong>Desenvolvedor:</strong> Luanderson Santos</p>
           <p><strong>Idade mínima para uso:</strong> 18 anos</p>
         </div>
@@ -21,7 +21,7 @@ const PrivacyPage: React.FC = () => {
             O <strong>Affetto</strong> é um aplicativo criado para que casais maiores de idade possam criar, compartilhar e usar cupons afetivos.
           </p>
           <p className="text-gray-700 mb-3">
-            Esta Política de Privacidade explica como os dados são coletados, utilizados e protegidos de acordo com as diretrizes da Google Play, LGPD, GDPR e demais regulamentações aplicáveis.
+            Esta Política de Privacidade explica como os dados são coletados, utilizados e protegidos de acordo com as diretrizes da Google Play, da App Store, LGPD, GDPR e demais regulamentações aplicáveis. Ela vale para o aplicativo (iOS e Android) e para o site de resgate de cupons.
           </p>
           <p className="text-gray-700">
             Ao usar o Affetto, você declara que possui 18 anos ou mais e concorda com esta política.
@@ -43,7 +43,9 @@ const PrivacyPage: React.FC = () => {
           
           <h3 className="text-xl font-semibold text-gray-800 mb-3">3.1. Dados fornecidos pelo usuário</h3>
           <ul className="list-disc list-inside text-gray-700 space-y-2 mb-4">
-            <li>Nome, e-mail e foto de perfil (via Google ou Apple)</li>
+            <li><strong>Cadastro com e-mail e senha:</strong> nome de exibição, endereço de e-mail e senha (armazenada de forma segura pelo Firebase Authentication)</li>
+            <li><strong>Login com Google:</strong> nome, e-mail e foto de perfil fornecidos pela conta Google</li>
+            <li><strong>Login com a Apple (somente iOS):</strong> nome (quando você optar por compartilhá-lo), endereço de e-mail (o e-mail da sua conta Apple ou um e-mail privado do serviço “Ocultar meu e-mail” da Apple, no domínio privaterelay.appleid.com) e o identificador de usuário da Apple. O nome e o e-mail são enviados pela Apple apenas na primeira autorização do aplicativo; nas sessões seguintes, o Affetto reutiliza os dados já salvos no seu perfil. A Apple não envia foto de perfil.</li>
             <li>Dados dos cupons criados (nome, categoria, quantidade, validade)</li>
             <li>Informações sobre uso de cupons</li>
             <li>Mensagens personalizadas (opcionais)</li>
@@ -51,15 +53,24 @@ const PrivacyPage: React.FC = () => {
 
           <h3 className="text-xl font-semibold text-gray-800 mb-3">3.2. Dados coletados automaticamente</h3>
           <ul className="list-disc list-inside text-gray-700 space-y-2 mb-4">
-            <li>Identificador para envio de notificações push</li>
-            <li>Dados técnicos do dispositivo (modelo, sistema operacional, idioma)</li>
+            <li>Identificador para envio de notificações push (token Expo Push)</li>
+            <li>Dados técnicos do dispositivo (modelo, sistema operacional, idioma), coletados principalmente pelo Firebase Analytics</li>
             <li>Versão do aplicativo</li>
+            <li>Identificadores de publicidade (como o IDFA no iOS), somente se você autorizar o rastreamento no aviso de App Tracking Transparency (ATT)</li>
           </ul>
 
           <h3 className="text-xl font-semibold text-gray-800 mb-3">3.3. Dados de links compartilhados</h3>
-          <p className="text-gray-700">
+          <p className="text-gray-700 mb-4">
             Ao compartilhar um cupom, um link único é gerado.
             O destinatário pode visualizar apenas informações essenciais sobre aquele cupom.
+          </p>
+
+          <h3 className="text-xl font-semibold text-gray-800 mb-3">3.4. Dados de assinaturas premium</h3>
+          <p className="text-gray-700 mb-3">
+            O Affetto oferece assinaturas premium processadas pela Google Play (Android) ou pela App Store (iOS), via RevenueCat. Podemos armazenar o identificador e o status da assinatura, datas de compra e expiração, identificadores de transação, valor, moeda e o vínculo entre a sua conta Affetto (Firebase UID) e a conta da loja.
+          </p>
+          <p className="text-gray-700">
+            Dados de pagamento (cartão de crédito, etc.) são processados exclusivamente pela Google Play ou pela App Store. O Affetto não tem acesso a essas informações.
           </p>
         </section>
 
@@ -67,14 +78,16 @@ const PrivacyPage: React.FC = () => {
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">4. Finalidade do Uso de Dados</h2>
           <p className="text-gray-700 mb-3">Os dados coletados são utilizados para:</p>
           <ul className="list-disc list-inside text-gray-700 space-y-2 mb-4">
-            <li>Autenticar o usuário via Google/Apple</li>
+            <li>Autenticar o usuário via e-mail/senha, Google Sign-In ou Sign in with Apple (iOS)</li>
             <li>Criar, gerenciar e sincronizar cupons na conta do usuário</li>
             <li>Permitir que cupons sejam visualizados por links compartilhados</li>
             <li>Enviar notificações push quando cupons forem usados ou atualizados</li>
-            <li>Melhorar o desempenho e corrigir falhas do app</li>
+            <li>Processar e gerenciar assinaturas premium</li>
+            <li>Medir o uso do aplicativo e melhorar o desempenho (Firebase Analytics)</li>
+            <li>Atribuir instalações e assinaturas a campanhas, quando houver a sua autorização</li>
           </ul>
           <p className="text-gray-700 font-semibold">
-            Não exibimos anúncios e não vendemos dados para terceiros.
+            Não exibimos anúncios no aplicativo e não vendemos dados para terceiros.
           </p>
         </section>
 
@@ -85,18 +98,51 @@ const PrivacyPage: React.FC = () => {
           <h3 className="text-xl font-semibold text-gray-800 mb-3">5.1. Firebase (Google)</h3>
           <ul className="list-disc list-inside text-gray-700 space-y-2 mb-4">
             <li>Firestore (banco de dados)</li>
-            <li>Authentication</li>
-            <li>Cloud Messaging (notificações)</li>
+            <li>Authentication (e-mail/senha, Google Sign-In e Sign in with Apple no iOS)</li>
+            <li>Cloud Messaging e Cloud Functions (notificações e eventos de assinatura)</li>
+            <li>Analytics (medição de uso do aplicativo; não usamos esses dados para anúncios no app)</li>
           </ul>
 
-          <h3 className="text-xl font-semibold text-gray-800 mb-3">5.2. Google e Apple</h3>
-          <p className="text-gray-700 mb-4">Utilizados apenas para login seguro.</p>
+          <h3 className="text-xl font-semibold text-gray-800 mb-3">5.2. Google Sign-In</h3>
+          <p className="text-gray-700 mb-4">Utilizado exclusivamente para login seguro com a conta Google.</p>
 
-          <h3 className="text-xl font-semibold text-gray-800 mb-3">5.3. Expo</h3>
-          <p className="text-gray-700 mb-4">Utilizado para gerenciar notificações push.</p>
+          <h3 className="text-xl font-semibold text-gray-800 mb-3">5.3. Sign in with Apple</h3>
+          <p className="text-gray-700 mb-3">
+            No iOS, o Affetto também oferece login com a Apple, além do cadastro com e-mail e senha e do Google Sign-In. A autenticação é processada pela Apple e pelo Firebase Authentication.
+          </p>
+          <p className="text-gray-700 mb-3">Quando você escolhe entrar com a Apple, podemos receber:</p>
+          <ul className="list-disc list-inside text-gray-700 space-y-2 mb-4">
+            <li>o nome que você autorizar a compartilhar;</li>
+            <li>o endereço de e-mail da sua conta Apple, ou um e-mail privado de retransmissão da Apple (“Ocultar meu e-mail”), no domínio privaterelay.appleid.com, se você optar por ocultar o e-mail real;</li>
+            <li>o identificador de usuário da Apple, usado pelo Firebase Authentication para reconhecer sua conta nas próximas sessões.</li>
+          </ul>
+          <p className="text-gray-700 mb-3">
+            Esses dados são usados exclusivamente para criar e autenticar sua conta no Affetto, exibir seu nome de perfil e, quando necessário, entrar em contato com você (por exemplo, sobre a exclusão da conta). Não usamos o login com a Apple para anúncios.
+          </p>
+          <p className="text-gray-700 mb-3">
+            A Apple pode ocultar o seu e-mail real. Nesse caso, o Affetto armazena apenas o endereço de retransmissão, que passa a ser o e-mail da sua conta no aplicativo. Use esse mesmo endereço no formulário de exclusão de conta.
+          </p>
+          <p className="text-gray-700 mb-4">
+            Você pode revogar o acesso do Affetto ao seu ID Apple a qualquer momento em <strong>Ajustes &gt; [seu nome] &gt; Iniciar Sessão com a Apple &gt; Affetto &gt; Deixar de usar o ID Apple</strong> (em inglês: Settings &gt; Apple ID &gt; Sign in with Apple). A revogação encerra o login com a Apple neste aplicativo. Para apagar os dados que o Affetto já armazenou, solicite também a exclusão da conta pelo aplicativo ou pela página de exclusão. Ao excluir a conta no iOS, o Affetto pede uma nova confirmação com a Apple e revoga os tokens de Sign in with Apple antes de apagar os dados. Se a conta Apple for excluída em um aparelho Android, a revogação pode ser feita nesses mesmos Ajustes do iPhone.
+          </p>
+
+          <h3 className="text-xl font-semibold text-gray-800 mb-3">5.4. RevenueCat</h3>
+          <p className="text-gray-700 mb-4">
+            Processa assinaturas no aplicativo, valida transações com a Google Play e a App Store, e envia eventos de assinatura ao nosso backend. O identificador da sua conta Affetto (Firebase UID) é vinculado à sua conta RevenueCat para gerenciar o status premium.
+          </p>
+
+          <h3 className="text-xl font-semibold text-gray-800 mb-3">5.5. Expo (notificações push)</h3>
+          <p className="text-gray-700 mb-4">
+            Utilizado para registrar e entregar notificações push. O token Expo Push é transmitido ao serviço Expo para encaminhamento à Google Play ou à App Store.
+          </p>
+
+          <h3 className="text-xl font-semibold text-gray-800 mb-3">5.6. Meta (SDK e atribuição)</h3>
+          <p className="text-gray-700 mb-4">
+            Usamos o SDK da Meta e a integração de atribuição do RevenueCat para medir instalações e assinaturas de campanhas. Não exibimos anúncios no Affetto e não registramos compras diretamente pelo SDK da Meta. Identificadores de publicidade (como o IDFA) só são coletados e encaminhados se você autorizar o rastreamento no aviso de App Tracking Transparency. Sem essa permissão, a atribuição pode ocorrer de forma limitada, sem o identificador de publicidade.
+          </p>
 
           <p className="text-gray-700 font-semibold">
-            Não há compartilhamento com anunciantes ou terceiros para fins comerciais.
+            Não vendemos dados para terceiros e não compartilhamos dados para que anúncios sejam exibidos dentro do Affetto.
           </p>
         </section>
 
@@ -119,7 +165,7 @@ const PrivacyPage: React.FC = () => {
             Os dados permanecem armazenados enquanto sua conta estiver ativa.
           </p>
           <p className="text-gray-700">
-            Caso deseje excluir sua conta, todos os seus dados serão removidos de forma permanente.
+            Caso deseje excluir sua conta, os seus dados pessoais serão removidos de forma permanente, exceto quando a retenção for exigida por lei (por exemplo, registros de transações de assinaturas, pelo período legal aplicável).
           </p>
         </section>
 
