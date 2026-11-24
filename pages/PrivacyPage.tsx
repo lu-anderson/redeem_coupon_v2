@@ -120,10 +120,10 @@ const PrivacyPage: React.FC = () => {
             Esses dados são usados exclusivamente para criar e autenticar sua conta no Affetto, exibir seu nome de perfil e, quando necessário, entrar em contato com você (por exemplo, sobre a exclusão da conta). Não usamos o login com a Apple para anúncios.
           </p>
           <p className="text-gray-700 mb-3">
-            A Apple pode ocultar o seu e-mail real. Nesse caso, o Affetto armazena apenas o endereço de retransmissão, que passa a ser o e-mail da sua conta no aplicativo. Use esse mesmo endereço no formulário de exclusão de conta.
+            A Apple pode ocultar o seu e-mail real. Nesse caso, o Affetto armazena apenas o endereço de retransmissão, que passa a ser o e-mail da sua conta no aplicativo. Use esse mesmo endereço para entrar no app ou no pedido de exclusão por e-mail.
           </p>
           <p className="text-gray-700 mb-4">
-            Você pode revogar o acesso do Affetto ao seu ID Apple a qualquer momento em <strong>Ajustes &gt; [seu nome] &gt; Iniciar Sessão com a Apple &gt; Affetto &gt; Deixar de usar o ID Apple</strong> (em inglês: Settings &gt; Apple ID &gt; Sign in with Apple). A revogação encerra o login com a Apple neste aplicativo. Para apagar os dados que o Affetto já armazenou, solicite também a exclusão da conta pelo aplicativo ou pela página de exclusão. Ao excluir a conta no iOS, o Affetto pede uma nova confirmação com a Apple e revoga os tokens de Sign in with Apple antes de apagar os dados. Se a conta Apple for excluída em um aparelho Android, a revogação pode ser feita nesses mesmos Ajustes do iPhone.
+            Você pode revogar o acesso do Affetto ao seu ID Apple a qualquer momento em <strong>Ajustes &gt; [seu nome] &gt; Iniciar Sessão com a Apple &gt; Affetto &gt; Deixar de usar o ID Apple</strong> (em inglês: Settings &gt; Apple ID &gt; Sign in with Apple). A revogação encerra o login com a Apple neste aplicativo. Para apagar os dados que o Affetto já armazenou, exclua a conta no aplicativo ou solicite a exclusão por e-mail na página de exclusão. Ao excluir a conta no iOS, o Affetto pede uma nova confirmação com a Apple e revoga os tokens de Sign in with Apple antes de apagar os dados. Se a exclusão não for feita no iPhone, a revogação pode ser feita nesses mesmos Ajustes.
           </p>
 
           <h3 className="text-xl font-semibold text-gray-800 mb-3">5.4. RevenueCat</h3>
@@ -165,7 +165,7 @@ const PrivacyPage: React.FC = () => {
             Os dados permanecem armazenados enquanto sua conta estiver ativa.
           </p>
           <p className="text-gray-700">
-            Caso deseje excluir sua conta, os seus dados pessoais serão removidos de forma permanente, exceto quando a retenção for exigida por lei (por exemplo, registros de transações de assinaturas, pelo período legal aplicável).
+            Caso deseje excluir sua conta, os dados pessoais da conta no Affetto são removidos de forma permanente, conforme a seção 10. Uma assinatura ativa da App Store ou do Google Play não é cancelada, e os registros de pagamento permanecem com a loja. O catálogo compartilhado de modelos de cupons não é um dado da sua conta e não é apagado.
           </p>
         </section>
 
@@ -191,35 +191,45 @@ const PrivacyPage: React.FC = () => {
             <li>Revogar consentimento</li>
           </ul>
           <p className="text-gray-700">
-            Para isso, entre em contato pelo e-mail abaixo.
+            Para isso, exclua a conta no aplicativo, use a página de exclusão ou entre em contato pelo e-mail abaixo.
           </p>
         </section>
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">10. Exclusão de Conta e Dados</h2>
           <p className="text-gray-700 mb-3">
-            Você pode solicitar a exclusão completa da sua conta e de todos os dados associados a qualquer momento.
+            Você pode excluir a conta a qualquer momento no aplicativo, ou solicitar a exclusão por e-mail se não puder usar o app.
+          </p>
+          <p className="text-gray-700 mb-3">
+            No Affetto, abra a tela inicial, toque no menu da conta no canto superior direito (ícone de três pontos, “Menu da conta”) e em “Excluir conta”. A exclusão pelo aplicativo é imediata. No iOS, se a conta foi criada com a Apple, o Affetto confirma com a Apple e revoga os tokens de Sign in with Apple antes de apagar os dados.
           </p>
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-            <p className="text-blue-900 font-semibold mb-2">📝 Solicite a exclusão online:</p>
+            <p className="text-blue-900 font-semibold mb-2">📝 Instruções e pedido por e-mail:</p>
             <a 
               href="/delete-account" 
               className="text-blue-600 hover:text-blue-800 underline font-medium"
             >
-              Acessar página de solicitação de exclusão de conta →
+              Acessar a página de exclusão de conta →
             </a>
           </div>
-          <p className="text-gray-700 mb-3">Ou entre em contato por e-mail:</p>
+          <p className="text-gray-700 mb-3">Ou escreva para o e-mail de suporte, informando o e-mail da sua conta. Pedidos por e-mail são processados em até 30 dias:</p>
           <p className="text-gray-700 mb-4">
             📧 <a href="mailto:luanderson.engsoftware@gmail.com" className="text-blue-600 hover:underline">luanderson.engsoftware@gmail.com</a>
           </p>
-          <p className="text-gray-700 mb-3">A exclusão inclui:</p>
-          <ul className="list-disc list-inside text-gray-700 space-y-2">
-            <li>Conta</li>
-            <li>Cupons criados</li>
-            <li>Histórico de uso</li>
-            <li>Tokens de notificação</li>
+          <p className="text-gray-700 mb-3">A exclusão no Affetto remove de forma permanente:</p>
+          <ul className="list-disc list-inside text-gray-700 space-y-2 mb-4">
+            <li>O perfil (nome, e-mail e foto)</li>
+            <li>Os cupons que você criou</li>
+            <li>O histórico de uso dos cupons</li>
+            <li>Notificações</li>
+            <li>Avaliações e feedback</li>
+            <li>Tokens de notificação push</li>
+            <li>Os registros de compras e de assinatura salvos no Affetto</li>
+            <li>A conta de login</li>
           </ul>
+          <p className="text-gray-700">
+            Uma assinatura ativa da App Store ou do Google Play não é cancelada: cancele nas configurações da loja. Os registros de pagamento da loja permanecem com a Apple ou com o Google. O catálogo compartilhado de modelos de cupons não é apagado.
+          </p>
         </section>
 
         <section className="mb-8">
