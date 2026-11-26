@@ -2,9 +2,12 @@
 export const ANDROID_PACKAGE = 'com.luanderson_eng_software.affetto';
 export const IOS_APP_STORE_ID = '6756904115';
 
+/** Default App Store Connect campaign provider token (`pt`). Overridable via env. */
+export const DEFAULT_APPLE_PROVIDER_TOKEN = '128372888';
+
 export const PLAY_STORE_URL = `https://play.google.com/store/apps/details?id=${ANDROID_PACKAGE}`;
-/** Brazilian App Store listing. Campaign CTAs start from this URL. */
-export const APP_STORE_URL = `https://apps.apple.com/br/app/affetto-cupons-e-vales/id${IOS_APP_STORE_ID}`;
+/** Official App Store product page used as the campaign-link base. */
+export const APP_STORE_URL = `https://apps.apple.com/app/apple-store/id${IOS_APP_STORE_ID}`;
 
 export type StorePlatform = 'ios' | 'android' | 'desktop';
 
@@ -37,15 +40,20 @@ function trimmed(value: unknown): string | undefined {
 }
 
 /**
- * App Store campaign link.
- * Query order: `pt` (only when a provider token exists), then `ct`, then `mt=8`.
- * An explicit non-empty `providerToken` wins. Otherwise the value is
- * `VITE_APPLE_PROVIDER_TOKEN`. An empty token omits `pt`.
+ * Official App Store campaign link:
+ * https://apps.apple.com/app/apple-store/id{appId}?pt={token}&ct={campaign}&mt=8
+ *
+ * Query order: `pt`, then `ct`, then `mt=8`.
+ * An explicit non-empty `providerToken` wins, then `VITE_APPLE_PROVIDER_TOKEN`,
+ * then `DEFAULT_APPLE_PROVIDER_TOKEN`.
  */
 export function appStoreCampaignUrl(campaignToken: string, providerToken?: string): string {
   const url = new URL(APP_STORE_URL);
-  const pt = trimmed(providerToken) ?? trimmed(import.meta.env.VITE_APPLE_PROVIDER_TOKEN);
-  if (pt) url.searchParams.append('pt', pt);
+  const pt =
+    trimmed(providerToken) ??
+    trimmed(import.meta.env.VITE_APPLE_PROVIDER_TOKEN) ??
+    DEFAULT_APPLE_PROVIDER_TOKEN;
+  url.searchParams.append('pt', pt);
   url.searchParams.append('ct', campaignToken);
   url.searchParams.append('mt', '8');
   return url.toString();

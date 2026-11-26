@@ -285,8 +285,8 @@ describe('RedeemPage', () => {
     expect(openSpy).toHaveBeenCalledTimes(1);
     const url = String(openSpy.mock.calls[0][0]);
     expect(openSpy).toHaveBeenCalledWith(url, '_blank', 'noopener');
-    expect(new URL(url).search).toBe('?ct=web_redeem&mt=8');
-    expect(url).toContain('https://apps.apple.com/br/app/affetto-cupons-e-vales/id6756904115');
+    expect(new URL(url).search).toBe('?pt=128372888&ct=web_redeem&mt=8');
+    expect(url).toContain('https://apps.apple.com/app/apple-store/id6756904115');
     expect(url).not.toContain('play.google.com');
     expect(analyticsMocks.trackStoreCtaClick).toHaveBeenCalledWith({
       placement: 'redeem_success',
@@ -322,7 +322,8 @@ describe('RedeemPage', () => {
     expect(openSpy).toHaveBeenCalledTimes(1);
     const url = String(openSpy.mock.calls[0][0]);
     expect(openSpy).toHaveBeenCalledWith(url, '_blank', 'noopener');
-    expect(new URL(url).search).toBe('?ct=web_redeem&mt=8');
+    expect(new URL(url).search).toBe('?pt=128372888&ct=web_redeem&mt=8');
+    expect(url).toContain('https://apps.apple.com/app/apple-store/id6756904115');
     expect(url).not.toContain('play.google.com');
     expect(analyticsMocks.trackStoreCtaClick).toHaveBeenCalledWith({
       placement: 'redeem_success',

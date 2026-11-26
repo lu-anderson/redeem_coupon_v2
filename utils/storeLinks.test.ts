@@ -22,8 +22,8 @@ describe('store links', () => {
     vi.unstubAllEnvs();
   });
 
-  it('uses the Brazilian App Store listing', () => {
-    expect(APP_STORE_URL).toBe('https://apps.apple.com/br/app/affetto-cupons-e-vales/id6756904115');
+  it('uses the official App Store product page', () => {
+    expect(APP_STORE_URL).toBe('https://apps.apple.com/app/apple-store/id6756904115');
     expect(PLAY_STORE_URL).toBe(
       'https://play.google.com/store/apps/details?id=com.luanderson_eng_software.affetto',
     );
@@ -50,12 +50,12 @@ describe('store links', () => {
     expect(appStoreUrlFor(ANDROID_UA)).not.toContain('cuponsdoamor');
   });
 
-  it('builds a campaign URL with ct and mt and omits an empty provider token', () => {
+  it('builds a campaign URL with the default provider token, ct, and mt', () => {
     const url = new URL(appStoreCampaignUrl('web_redeem'));
 
     expect(url.origin + url.pathname).toBe(APP_STORE_URL);
-    expect(url.search).toBe('?ct=web_redeem&mt=8');
-    expect(url.searchParams.has('pt')).toBe(false);
+    expect(url.search).toBe('?pt=128372888&ct=web_redeem&mt=8');
+    expect(url.searchParams.get('pt')).toBe('128372888');
     expect(url.searchParams.get('ct')).toBe('web_redeem');
     expect(url.searchParams.get('mt')).toBe('8');
   });
@@ -86,11 +86,9 @@ describe('store links', () => {
     expect(appStoreCampaignUrl('web_home', '   ').split('?')[1]).toBe('pt=env-provider&ct=web_home&mt=8');
   });
 
-  it('omits pt when the environment token is blank', () => {
+  it('falls back to the default provider token when the environment token is blank', () => {
     vi.stubEnv('VITE_APPLE_PROVIDER_TOKEN', '   ');
 
-    const url = appStoreCampaignUrl('web_home');
-    expect(url).not.toContain('pt=');
-    expect(new URL(url).search).toBe('?ct=web_home&mt=8');
+    expect(appStoreCampaignUrl('web_home').split('?')[1]).toBe('pt=128372888&ct=web_home&mt=8');
   });
 });
