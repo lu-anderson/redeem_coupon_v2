@@ -5,6 +5,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { COUPON_FETCH_TIMEOUT_MS } from '../utils/withTimeout';
 import RedeemPage from './RedeemPage';
 
+const analyticsMocks = vi.hoisted(() => ({
+  trackCouponRedeemed: vi.fn(() => Promise.resolve()),
+  trackStoreCtaClick: vi.fn(() => Promise.resolve()),
+  trackPageView: vi.fn(() => Promise.resolve()),
+}));
+
+vi.mock('../services/analytics', () => analyticsMocks);
+
 const firebaseState = vi.hoisted(() => ({
   configured: true,
 }));
@@ -91,11 +99,26 @@ function renderRedeem(path: string) {
   return render(ui);
 }
 
+const IPHONE_UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)';
+const ANDROID_UA = 'Mozilla/5.0 (Linux; Android 14; Pixel 8)';
+const DESKTOP_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)';
+
+function mockNavigator(userAgent: string, maxTouchPoints = 0) {
+  vi.spyOn(window.navigator, 'userAgent', 'get').mockReturnValue(userAgent);
+  Object.defineProperty(window.navigator, 'maxTouchPoints', {
+    configurable: true,
+    value: maxTouchPoints,
+  });
+}
+
 describe('RedeemPage', () => {
   beforeEach(() => {
     firebaseState.configured = true;
     firestoreMocks.getDoc.mockReset();
     firestoreMocks.doc.mockClear();
+    analyticsMocks.trackCouponRedeemed.mockClear();
+    analyticsMocks.trackStoreCtaClick.mockClear();
+    vi.stubEnv('VITE_APPLE_PROVIDER_TOKEN', '');
     vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
@@ -103,6 +126,7 @@ describe('RedeemPage', () => {
     cleanup();
     vi.useRealTimers();
     vi.restoreAllMocks();
+    vi.unstubAllEnvs();
   });
 
   it('renders the redeem UI for a premium coupon with a null expiration date', async () => {
@@ -227,12 +251,11 @@ describe('RedeemPage', () => {
     expect(screen.queryByRole('button', { name: 'Resgatar Agora' })).not.toBeInTheDocument();
   });
 
-  it('shows the success state and opens the Affetto store listing', async () => {
+  async function redeemPremiumCoupon() {
     firestoreMocks.getDoc.mockResolvedValue(
       couponSnapshot({ ...premiumCouponData, name: 'Pedido ******** Específico', observations: 'Só hoje' }),
     );
     firestoreMocks.runTransaction.mockResolvedValue(undefined);
-    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
 
     renderRedeem('/redeem/coupon-1');
 
@@ -240,16 +263,70 @@ describe('RedeemPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Resgatar Agora' }));
 
     expect(await screen.findByRole('heading', { name: 'Resgatado!' })).toBeInTheDocument();
+  }
+
+  it('logs a premium redemption and opens the iOS campaign listing', async () => {
+    mockNavigator(IPHONE_UA);
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+
+    await redeemPremiumCoupon();
+
     expect(screen.getByText('Fantasia à sua escolha')).toBeInTheDocument();
     expect(screen.getByText('Só hoje')).toBeInTheDocument();
     expect(screen.getByText(/Gostou da surpresa\?/)).toBeInTheDocument();
 
+    expect(analyticsMocks.trackCouponRedeemed).toHaveBeenCalledTimes(1);
+    const payload = analyticsMocks.trackCouponRedeemed.mock.calls[0][0];
+    expect(payload).toEqual({ category: 'Picante +18 (Premium)', is_premium: true });
+    expect(payload).not.toHaveProperty('userName');
+    expect(JSON.stringify(analyticsMocks.trackCouponRedeemed.mock.calls)).not.toContain('Ana');
+
     fireEvent.click(screen.getByRole('button', { name: 'Baixar o App' }));
     expect(openSpy).toHaveBeenCalledTimes(1);
     const url = String(openSpy.mock.calls[0][0]);
-    expect(url).not.toContain('cuponsdoamor');
-    expect(url).toMatch(
-      /^(https:\/\/play\.google\.com\/store\/apps\/details\?id=com\.luanderson_eng_software\.affetto|https:\/\/apps\.apple\.com\/app\/id6756904115)$/,
-    );
+    expect(openSpy).toHaveBeenCalledWith(url, '_blank', 'noopener');
+    expect(new URL(url).search).toBe('?ct=web_redeem&mt=8');
+    expect(url).toContain('https://apps.apple.com/br/app/affetto-cupons-e-vales/id6756904115');
+    expect(url).not.toContain('play.google.com');
+    expect(analyticsMocks.trackStoreCtaClick).toHaveBeenCalledWith({
+      placement: 'redeem_success',
+      platform: 'ios',
+    });
+  });
+
+  it('shows an Android coming-soon notice and does not open a store', async () => {
+    mockNavigator(ANDROID_UA);
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+
+    await redeemPremiumCoupon();
+
+    expect(screen.getByText('Android em breve')).toBeInTheDocument();
+    expect(screen.getByText('Em breve também para Android')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /baixar/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(document.body.innerHTML).not.toContain('play.google.com');
+    expect(document.body.innerHTML).not.toContain('apps.apple.com');
+    expect(openSpy).not.toHaveBeenCalled();
+    expect(analyticsMocks.trackStoreCtaClick).not.toHaveBeenCalled();
+  });
+
+  it('opens the desktop App Store campaign and notes that Android is coming', async () => {
+    mockNavigator(DESKTOP_UA);
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+
+    await redeemPremiumCoupon();
+
+    expect(screen.getByText('Android em breve')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Baixar na App Store' }));
+
+    expect(openSpy).toHaveBeenCalledTimes(1);
+    const url = String(openSpy.mock.calls[0][0]);
+    expect(openSpy).toHaveBeenCalledWith(url, '_blank', 'noopener');
+    expect(new URL(url).search).toBe('?ct=web_redeem&mt=8');
+    expect(url).not.toContain('play.google.com');
+    expect(analyticsMocks.trackStoreCtaClick).toHaveBeenCalledWith({
+      placement: 'redeem_success',
+      platform: 'desktop',
+    });
   });
 });

@@ -39,6 +39,7 @@ function toFirebaseOptions(config: FirebaseWebConfig): FirebaseOptions {
   };
   if (config.storageBucket) options.storageBucket = config.storageBucket;
   if (config.messagingSenderId) options.messagingSenderId = config.messagingSenderId;
+  if (config.measurementId) options.measurementId = config.measurementId;
   return options;
 }
 
@@ -60,6 +61,11 @@ export function createFirebaseServices(config: FirebaseWebConfig): FirebaseServi
 const services = createFirebaseServices(readFirebaseWebConfig(import.meta.env));
 
 export const db: Firestore | null = services.db;
+
+/** The app created during startup, or null when required config is missing. */
+export function getFirebaseApp(): FirebaseApp | null {
+  return services.app;
+}
 
 export function isFirebaseConfigured(): boolean {
   return services.missing.length === 0 && services.db != null;

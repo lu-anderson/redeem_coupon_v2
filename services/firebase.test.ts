@@ -59,4 +59,16 @@ describe('createFirebaseServices', () => {
     });
     expect(getFirestore).toHaveBeenCalledTimes(1);
   });
+
+  it('forwards measurementId when it is present', () => {
+    createFirebaseServices({ ...validConfig, measurementId: 'G-TEST' });
+
+    expect(initializeApp).toHaveBeenCalledWith({
+      apiKey: 'dummy-api-key',
+      authDomain: 'dummy.firebaseapp.com',
+      projectId: 'dummy-project',
+      appId: 'dummy-app-id',
+      measurementId: 'G-TEST',
+    });
+  });
 });
