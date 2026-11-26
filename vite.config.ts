@@ -6,9 +6,13 @@ import { FIREBASE_ENV_VARS, missingFirebaseEnvVars, readFirebaseWebConfig } from
 
 export default defineConfig(({ command, mode }) => {
     const env = loadEnv(mode, process.cwd(), '');
+    // Optional client vars. They are not part of the required Firebase build check.
+    const OPTIONAL_CLIENT_ENV_VARS = ['VITE_APPLE_PROVIDER_TOKEN'] as const;
     // Shell exports must count even if loadEnv only read files. Vite also
     // inlines these VITE_* values into import.meta.env for the client bundle.
-    for (const name of FIREBASE_ENV_VARS) {
+    // VITE_FIREBASE_MEASUREMENT_ID is optional (listed in FIREBASE_ENV_VARS)
+    // and must not fail the build when it is empty.
+    for (const name of [...FIREBASE_ENV_VARS, ...OPTIONAL_CLIENT_ENV_VARS]) {
       const fromProcess = process.env[name];
       if (typeof fromProcess === 'string' && fromProcess.trim() !== '') {
         env[name] = fromProcess;

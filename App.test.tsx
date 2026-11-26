@@ -1,6 +1,14 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
+
+const analyticsMocks = vi.hoisted(() => ({
+  trackPageView: vi.fn(() => Promise.resolve()),
+  trackCouponRedeemed: vi.fn(() => Promise.resolve()),
+  trackStoreCtaClick: vi.fn(() => Promise.resolve()),
+}));
+
+vi.mock('./services/analytics', () => analyticsMocks);
 
 vi.mock('./pages/RedeemPage', () => ({
   default: () => <h1>Resgatar Cupom</h1>,
@@ -14,6 +22,7 @@ function renderAt(path: string) {
 describe('App routes', () => {
   afterEach(() => {
     cleanup();
+    analyticsMocks.trackPageView.mockClear();
     window.history.pushState({}, '', '/');
   });
 
@@ -37,5 +46,18 @@ describe('App routes', () => {
     renderAt('/not-a-page');
     expect(await screen.findByRole('heading', { level: 1, name: 'Affetto' })).toBeInTheDocument();
     expect(window.location.pathname).toBe('/');
+  });
+
+  it('logs page_view with page_path when the route changes', async () => {
+    renderAt('/?src=share');
+    expect(analyticsMocks.trackPageView).toHaveBeenCalledWith('/?src=share');
+
+    analyticsMocks.trackPageView.mockClear();
+    fireEvent.click(screen.getAllByRole('link', { name: 'Política de Privacidade' })[0]);
+
+    expect(await screen.findByRole('heading', { name: /Política de Privacidade/ })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(analyticsMocks.trackPageView).toHaveBeenCalledWith('/privacy');
+    });
   });
 });

@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Gift, Heart, Share2, Ticket } from 'lucide-react';
+import { Download, Gift, Heart, Share2, Ticket } from 'lucide-react';
 import BrandHeader from '../components/BrandHeader';
+import { trackStoreCtaClick } from '../services/analytics';
+import { appStoreCampaignUrl, detectStorePlatform } from '../utils/storeLinks';
 
 export const HOME_TITLE = 'Affetto - Cupons do Amor para casais';
 
@@ -23,6 +25,9 @@ const STEPS = [
   },
 ] as const;
 
+const PRIMARY_BUTTON =
+  'w-full max-w-xs h-[54px] rounded-2xl bg-primary text-primary-on font-bold text-base shadow-button flex items-center justify-center gap-2.5 transition-all hover:bg-primary-pressed active:scale-[.98] active:bg-primary-pressed focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/30';
+
 const HomePage: React.FC = () => {
   useEffect(() => {
     const previousTitle = document.title;
@@ -32,6 +37,13 @@ const HomePage: React.FC = () => {
     };
   }, []);
 
+  const openStore = () => {
+    const touchPoints = typeof navigator.maxTouchPoints === 'number' ? navigator.maxTouchPoints : 0;
+    const platform = detectStorePlatform(navigator.userAgent, touchPoints);
+    window.open(appStoreCampaignUrl('web_home'), '_blank', 'noopener');
+    void trackStoreCtaClick({ placement: 'home', platform });
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-canvas text-ink">
       <BrandHeader />
@@ -40,11 +52,16 @@ const HomePage: React.FC = () => {
           <h1 className="text-[40px] leading-none font-extrabold tracking-[-.4px] text-ink">Affetto</h1>
           <p className="text-lg font-extrabold text-primary">Cupons do Amor para casais</p>
           <p className="max-w-xl text-[15px] leading-6 text-ink-soft">
-            O Affetto é um aplicativo para iOS e Android que ajuda casais a criar, compartilhar e resgatar cupons de carinho e afeto. Surpreenda quem você ama com pequenos gestos que viram momentos especiais.
+            O Affetto é um aplicativo para iPhone que ajuda casais a criar, compartilhar e resgatar cupons de carinho e afeto. Surpreenda quem você ama com pequenos gestos que viram momentos especiais.
           </p>
           <p lang="en" className="max-w-xl text-sm leading-5 text-ink-soft">
             Affetto is a mobile app for couples to create, share and redeem love coupons.
           </p>
+          <button type="button" onClick={openStore} className={PRIMARY_BUTTON}>
+            <Download className="w-5 h-5" aria-hidden="true" />
+            Baixar na App Store
+          </button>
+          <p className="text-xs text-ink-soft">Disponível para iPhone • Android em breve</p>
         </section>
 
         <section className="flex flex-col gap-4">

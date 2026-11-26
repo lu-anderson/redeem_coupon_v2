@@ -12,6 +12,7 @@ export const REQUIRED_FIREBASE_ENV_VARS = [
 export const OPTIONAL_FIREBASE_ENV_VARS = [
   'VITE_FIREBASE_STORAGE_BUCKET',
   'VITE_FIREBASE_MESSAGING_SENDER_ID',
+  'VITE_FIREBASE_MEASUREMENT_ID',
 ] as const;
 
 export const FIREBASE_ENV_VARS = [
@@ -35,6 +36,8 @@ export type FirebaseWebConfig = {
   storageBucket?: string;
   messagingSenderId?: string;
   appId?: string;
+  /** Optional GA4 measurement ID. Analytics stays off when this is absent. */
+  measurementId?: string;
 };
 
 function nonEmpty(value: unknown): string | undefined {
@@ -50,6 +53,7 @@ export type FirebaseEnvSource = {
   VITE_FIREBASE_STORAGE_BUCKET?: string;
   VITE_FIREBASE_MESSAGING_SENDER_ID?: string;
   VITE_FIREBASE_APP_ID?: string;
+  VITE_FIREBASE_MEASUREMENT_ID?: string;
 };
 
 export function readFirebaseWebConfig(env: FirebaseEnvSource): FirebaseWebConfig {
@@ -60,6 +64,7 @@ export function readFirebaseWebConfig(env: FirebaseEnvSource): FirebaseWebConfig
     storageBucket: nonEmpty(env.VITE_FIREBASE_STORAGE_BUCKET),
     messagingSenderId: nonEmpty(env.VITE_FIREBASE_MESSAGING_SENDER_ID),
     appId: nonEmpty(env.VITE_FIREBASE_APP_ID),
+    measurementId: nonEmpty(env.VITE_FIREBASE_MEASUREMENT_ID),
   };
 }
 

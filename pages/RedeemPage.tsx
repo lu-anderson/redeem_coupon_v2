@@ -10,9 +10,11 @@ import BrandHeader from '../components/BrandHeader';
 import CouponArt, { artKeyFor } from '../components/CouponArt';
 import RarityTag from '../components/RarityTag';
 import { ObservationsBox } from '../components/CouponCard';
-import { appStoreUrlFor } from '../utils/storeLinks';
+import { appStoreCampaignUrl, detectStorePlatform, type StorePlatform } from '../utils/storeLinks';
+import { isPremiumCoupon } from '../utils/couponPremium';
 import { COUPON_FETCH_TIMEOUT_MS, withTimeout } from '../utils/withTimeout';
 import { resolveCouponTexts, resolveCouponVisuals } from '../utils/couponDisplay';
+import { trackCouponRedeemed, trackStoreCtaClick } from '../services/analytics';
 
 function isFirebaseConfigError(error: unknown): boolean {
   return error instanceof Error && error.name === 'FirebaseConfigError';
@@ -95,6 +97,13 @@ const RedeemPage: React.FC = () => {
     setRedeeming(true);
     try {
       await redeemCoupon(id, userName);
+      if (coupon) {
+        // Category and premium flag only. Never send the redeemer name or other PII.
+        void trackCouponRedeemed({
+          category: coupon.category,
+          is_premium: isPremiumCoupon(coupon),
+        });
+      }
       setSuccess(true);
       confetti({
         particleCount: 150,
@@ -112,11 +121,6 @@ const RedeemPage: React.FC = () => {
     } finally {
       setRedeeming(false);
     }
-  };
-
-  const openStore = () => {
-    const touchPoints = typeof navigator.maxTouchPoints === 'number' ? navigator.maxTouchPoints : 0;
-    window.open(appStoreUrlFor(navigator.userAgent, touchPoints), '_blank', 'noopener');
   };
 
   if (loading) {
@@ -159,6 +163,8 @@ const RedeemPage: React.FC = () => {
   if (success) {
     const visuals = resolveCouponVisuals(coupon);
     const texts = resolveCouponTexts(coupon);
+    const touchPoints = typeof navigator.maxTouchPoints === 'number' ? navigator.maxTouchPoints : 0;
+    const storePlatform = detectStorePlatform(navigator.userAgent, touchPoints);
 
     return (
       <PageShell>
@@ -187,16 +193,7 @@ const RedeemPage: React.FC = () => {
               </div>
             )}
 
-            <div className="w-full bg-white border border-line rounded-[20px] p-4 flex flex-col gap-3">
-              <p className="text-sm font-semibold text-ink">
-                Gostou da surpresa?<br />
-                Crie também momentos inesquecíveis para quem você ama!
-              </p>
-              <button type="button" onClick={openStore} className={PRIMARY_BUTTON}>
-                <Download className="w-5 h-5" aria-hidden="true" />
-                Baixar o App
-              </button>
-            </div>
+            <SuccessStoreCta platform={storePlatform} />
 
             <button
               type="button"
@@ -290,6 +287,41 @@ const RedeemPage: React.FC = () => {
 
 const PRIMARY_BUTTON =
   'w-full h-[54px] rounded-2xl bg-primary text-primary-on font-bold text-base shadow-button flex items-center justify-center gap-2.5 transition-all hover:bg-primary-pressed active:scale-[.98] active:bg-primary-pressed focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/30';
+
+function openRedeemStore(platform: 'ios' | 'desktop') {
+  window.open(appStoreCampaignUrl('web_redeem'), '_blank', 'noopener');
+  void trackStoreCtaClick({ placement: 'redeem_success', platform });
+}
+
+/** Post-redeem store CTA. Android has no store link until the Play listing exists. */
+const SuccessStoreCta: React.FC<{ platform: StorePlatform }> = ({ platform }) => (
+  <div className="w-full bg-white border border-line rounded-[20px] p-4 flex flex-col gap-3">
+    <p className="text-sm font-semibold text-ink">
+      Gostou da surpresa?<br />
+      Crie também momentos inesquecíveis para quem você ama!
+    </p>
+    {platform === 'android' ? (
+      <div className="rounded-2xl bg-lilac px-4 py-3">
+        <p className="text-sm font-extrabold text-primary">Android em breve</p>
+        <p className="mt-1 text-xs leading-5 text-ink-soft">Em breve também para Android</p>
+      </div>
+    ) : (
+      <>
+        <button
+          type="button"
+          onClick={() => {
+            if (platform === 'ios' || platform === 'desktop') openRedeemStore(platform);
+          }}
+          className={PRIMARY_BUTTON}
+        >
+          <Download className="w-5 h-5" aria-hidden="true" />
+          {platform === 'ios' ? 'Baixar o App' : 'Baixar na App Store'}
+        </button>
+        {platform === 'desktop' && <p className="text-xs text-ink-soft">Android em breve</p>}
+      </>
+    )}
+  </div>
+);
 
 /** Brand header plus the page background (gradient on desktop, as in G17D). */
 const PageShell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
